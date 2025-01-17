@@ -62,19 +62,19 @@ class _OnboardingScreenViewState extends State<OnboardingScreenView> {
         },
         children: [
           _buildPage(
-            image: 'assets/images/logo.png',
-            title: 'Welcome to SoundSage',
-            description: 'Find your perfect instrument, play and learn',
+            image: 'assets/images/fitnest_logo.png',
+            title: 'Welcome to FitZone',
+            description: 'Your journey to a healthier life starts here!',
           ),
           _buildPage(
-            image: 'assets/images/covdrum.jpg',
-            title: 'Listen Anywhere',
-            description: 'Stream music anytime, anywhere without limits.',
+            image: 'assets/images/gym_welcome.jpg',
+            title: 'Personalized Workouts',
+            description: 'Get tailored workout plans to match your goals.',
           ),
           _buildPage(
-            image: 'assets/images/first.png',
-            title: 'Get Started Now!',
-            description: 'Enjoy unlimited music and playlists just for you.',
+            image: 'assets/images/progress_tracking.jpg',
+            title: 'Achieve Your Fitness Goals',
+            description: 'Track your progress and stay motivated!',
           ),
         ],
       ),
@@ -95,7 +95,7 @@ class _OnboardingScreenViewState extends State<OnboardingScreenView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Image.asset(image, height: 300), // Add your onboarding image here
+          Image.asset(image, height: 300), // Onboarding image
           const SizedBox(height: 30),
           Text(
             title,
@@ -112,7 +112,7 @@ class _OnboardingScreenViewState extends State<OnboardingScreenView> {
             textAlign: TextAlign.center,
             style: const TextStyle(
               fontSize: 16,
-              color: Colors.grey,
+              color: Colors.deepPurple,
             ),
           ),
         ],
@@ -150,7 +150,7 @@ class _OnboardingScreenViewState extends State<OnboardingScreenView> {
               curve: Curves.easeInOut,
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueGrey[900],
+              backgroundColor: Colors.deepPurple,
               foregroundColor: Colors.white,
             ),
             child: const Text("Next"),
@@ -174,7 +174,7 @@ class _OnboardingScreenViewState extends State<OnboardingScreenView> {
             child: ElevatedButton(
               onPressed: _navigateToLogin,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueGrey[900],
+                backgroundColor: Colors.deepPurple,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

@@ -21,17 +21,7 @@ class _RegisterViewState extends State<RegisterView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
+      backgroundColor: Colors.grey[100], // Light background for a fresh look
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -40,138 +30,65 @@ class _RegisterViewState extends State<RegisterView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 10),
-                const Text(
-                  "Let's create your account",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                const SizedBox(height: 30),
+
+                // Title
+                const Center(
+                  child: Text(
+                    "Create an Account",
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 20),
-                // First Name and Last Name Fields
+
+                // First Name
+                _buildTextField(_fnameController, "First Name", Icons.person),
+
+                const SizedBox(height: 16),
+
+                // Last Name
+                _buildTextField(_lnameController, "Last Name", Icons.person),
+
+                const SizedBox(height: 16),
+
+                // Username
+                _buildTextField(
+                    _usernameController, "Username", Icons.person_outline),
+
+                const SizedBox(height: 16),
+
+                // Phone Number
+                _buildTextField(_phoneController, "Phone Number", Icons.phone),
+
+                const SizedBox(height: 16),
+
+                // Password
+                _buildTextField(
+                    _passwordController, "Password", Icons.lock_outline,
+                    isPassword: true),
+
+                const SizedBox(height: 20),
+
+                // Privacy Policy Agreement
                 Row(
                   children: [
-                    Expanded(
-                      child: TextFormField(
-                        controller: _fnameController,
-                        decoration: InputDecoration(
-                          labelText: "First Name",
-                          prefixIcon: const Icon(Icons.person_outline),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your first name';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextFormField(
-                        controller: _lnameController,
-                        decoration: InputDecoration(
-                          labelText: "Last Name",
-                          prefixIcon: const Icon(Icons.person_outline),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Please enter your last name';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                // Username field
-                TextFormField(
-                  controller: _usernameController,
-                  decoration: InputDecoration(
-                    labelText: "Username",
-                    prefixIcon: const Icon(Icons.person),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your username';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                // Phone Number Field
-                TextFormField(
-                  controller: _phoneController,
-                  decoration: InputDecoration(
-                    labelText: "Phone Number",
-                    prefixIcon: const Icon(Icons.phone),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your phone number';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                // Password Field
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    labelText: "Password",
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: const Icon(Icons.visibility_off_outlined),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    if (value.length < 6) {
-                      return 'Password must be at least 6 characters long';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                // Privacy Policy Agreement
-                Wrap(
-                  alignment: WrapAlignment.start,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 0.0),
-                      child: Checkbox(
-                        value: true,
-                        onChanged: (value) {},
-                        visualDensity: VisualDensity.compact,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
+                    Checkbox(
+                      value: true,
+                      onChanged: (value) {},
+                      activeColor: Colors.deepPurple,
                     ),
                     const Text("I agree to "),
                     GestureDetector(
                       onTap: () {},
                       child: const Text(
                         "Privacy Policy",
-                        style: TextStyle(color: Colors.blue),
+                        style: TextStyle(
+                            color: Colors.deepPurple,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                     const Text(" and "),
@@ -179,12 +96,16 @@ class _RegisterViewState extends State<RegisterView> {
                       onTap: () {},
                       child: const Text(
                         "Terms of Use",
-                        style: TextStyle(color: Colors.blue),
+                        style: TextStyle(
+                            color: Colors.deepPurple,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
+
                 const SizedBox(height: 20),
+
                 // Create Account Button
                 SizedBox(
                   width: double.infinity,
@@ -205,7 +126,7 @@ class _RegisterViewState extends State<RegisterView> {
                     },
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: Colors.blueGrey[900],
+                      backgroundColor: Colors.deepPurple,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -220,12 +141,68 @@ class _RegisterViewState extends State<RegisterView> {
                     ),
                   ),
                 ),
+
+                const SizedBox(height: 16),
+
+                // Log in Button (Instead of Back Button)
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      // Navigate to login page
+                      Navigator.pop(
+                          context); // Change to your login page navigation
+                    },
+                    child: const Text(
+                      "Already have an account? Log in",
+                      style: TextStyle(
+                        color: Colors.deepPurple,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 20),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField(
+      TextEditingController controller, String label, IconData icon,
+      {bool isPassword = false}) {
+    return TextFormField(
+      controller: controller,
+      obscureText: isPassword,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Colors.deepPurple),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Colors.deepPurple, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your $label';
+        }
+        if (isPassword && value.length < 6) {
+          return 'Password must be at least 6 characters long';
+        }
+        return null;
+      },
     );
   }
 }
