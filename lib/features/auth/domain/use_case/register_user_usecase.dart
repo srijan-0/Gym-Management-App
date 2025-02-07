@@ -2,7 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../app/use_case/usecase.dart';
-import '../../../../core/error/Failure.dart';
+import '../../../../core/error/failure.dart';
 import '../entity/auth_entity.dart';
 import '../repository/auth_repository.dart';
 
@@ -12,6 +12,7 @@ class RegisterUserParams extends Equatable {
   final String phone;
   final String username;
   final String password;
+  final String? image;
 
   const RegisterUserParams({
     required this.fname,
@@ -19,6 +20,7 @@ class RegisterUserParams extends Equatable {
     required this.phone,
     required this.username,
     required this.password,
+    this.image,
   });
 
   //intial constructor
@@ -28,6 +30,7 @@ class RegisterUserParams extends Equatable {
     required this.phone,
     required this.username,
     required this.password,
+    this.image,
   });
 
   @override
@@ -47,6 +50,7 @@ class RegisterUseCase implements UsecaseWithParams<void, RegisterUserParams> {
       phone: params.phone,
       username: params.username,
       password: params.password,
+      image: params.image,
     );
     return repository.registercustomer(authEntity);
   }

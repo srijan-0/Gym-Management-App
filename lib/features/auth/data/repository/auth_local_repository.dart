@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 
-import '../../../../core/error/Failure.dart';
+import '../../../../core/error/failure.dart';
 import '../../domain/entity/auth_entity.dart';
 import '../../domain/repository/auth_repository.dart';
 import '../data_source/local_datasource/auth_local_datasource.dart';
@@ -46,7 +46,6 @@ class AuthLocalRepository implements IAuthRepository {
 
   @override
   Future<Either<Failure, String>> uploadProfilePicture(File file) async {
-    // TODO: implement uploadProfilePicture
     throw UnimplementedError();
   }
 }

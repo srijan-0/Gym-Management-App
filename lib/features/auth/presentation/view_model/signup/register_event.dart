@@ -8,7 +8,13 @@ sealed class RegisterEvent extends Equatable {
 }
 
 class LoadCoursesAndBatches extends RegisterEvent {}
+class UploadImage extends RegisterEvent {
+  final File file;
 
+  const UploadImage({
+    required this.file,
+  });
+}
 class Registercustomer extends RegisterEvent {
   final BuildContext context;
   final String fName;
@@ -16,6 +22,7 @@ class Registercustomer extends RegisterEvent {
   final String phone;
   final String username;
   final String password;
+  final String? image;
 
   const Registercustomer({
     required this.context,
@@ -24,5 +31,6 @@ class Registercustomer extends RegisterEvent {
     required this.phone,
     required this.username,
     required this.password,
+    this.image,
   });
 }
