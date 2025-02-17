@@ -7,21 +7,21 @@ import '../../../../core/error/failure.dart';
 import '../repository/auth_repository.dart';
 
 class LoginParams extends Equatable {
-  final String username;
+  final String email;
   final String password;
 
   const LoginParams({
-    required this.username,
+    required this.email,
     required this.password,
   });
 
   // Initial Constructor
   const LoginParams.initial()
-      : username = '',
+      : email = '',
         password = '';
 
   @override
-  List<Object> get props => [username, password];
+  List<Object> get props => [email, password];
 }
 
 class LoginUseCase implements UsecaseWithParams<String, LoginParams> {
@@ -33,7 +33,7 @@ class LoginUseCase implements UsecaseWithParams<String, LoginParams> {
   @override
   Future<Either<Failure, String>> call(LoginParams params) async {
     final result =
-        await repository.logincustomer(params.username, params.password);
+        await repository.logincustomer(params.email, params.password);
     return result.fold(
       (failure) => Left(failure),
       (token) async {

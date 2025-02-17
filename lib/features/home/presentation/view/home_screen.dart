@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart'; // Import to format date and time
+import 'package:login/features/auth/data/repository/notice_repository_impl.dart';
+import 'package:login/features/auth/domain/entity/notice.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,6 +13,20 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
+  late Future<List<Notice>> _notices;
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch notices when the screen loads
+    _notices = _fetchNotices();
+  }
+
+  // Fetch notices from the repository
+  Future<List<Notice>> _fetchNotices() async {
+    final repository = NoticeRepositoryImpl(http.Client());
+    return await repository.getNotices();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -81,7 +99,11 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           const Text(
             "🏋️ Welcome to Your Gym!",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: Colors.deepPurple,
+            ),
           ),
           const SizedBox(height: 20),
 
@@ -116,6 +138,60 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildHighlightCard("💪 Workouts Done", "3/5 Days"),
               _buildHighlightCard("📅 Next Class", "Yoga - 6 PM"),
             ],
+          ),
+          const SizedBox(height: 20),
+
+          // Notices Section
+          const Text("📢 Latest Notices",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+
+          // Display Notices
+          FutureBuilder<List<Notice>>(
+            future: _notices,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const Center(child: Text('No notices available.'));
+              } else {
+                final notices = snapshot.data!;
+                return Column(
+                  children: notices.map((notice) {
+                    // Format date
+                    // Format date and time
+                    String formattedDateTime =
+                        DateFormat('yMMMd h:mm a').format(notice.time);
+
+                    return Card(
+                      elevation: 3,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                      child: ListTile(
+                        title: Text(notice.title,
+                            style: const TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(notice.description,
+                                style: const TextStyle(fontSize: 14)),
+                            const SizedBox(height: 5),
+                            Text(
+                              "📅 $formattedDateTime",
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                );
+              }
+            },
           ),
         ],
       ),
@@ -211,18 +287,10 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 20),
           const Text("Name: John Doe", style: TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
-          const Text("Email: johndoe@gmail.com",
-              style: TextStyle(fontSize: 18)),
+          const Text("Membership: Gold Plan", style: TextStyle(fontSize: 18)),
           const SizedBox(height: 10),
-          const Text("Membership: Gold Plan",
-              style: TextStyle(fontSize: 18, color: Colors.deepPurple)),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-            child: const Text("Update Profile",
-                style: TextStyle(color: Colors.white)),
-          ),
+          const Text("Expires: 15th March 2025",
+              style: TextStyle(fontSize: 18)),
         ],
       ),
     );
