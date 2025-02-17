@@ -8,6 +8,7 @@ sealed class RegisterEvent extends Equatable {
 }
 
 class LoadCoursesAndBatches extends RegisterEvent {}
+
 class UploadImage extends RegisterEvent {
   final File file;
 
@@ -15,22 +16,25 @@ class UploadImage extends RegisterEvent {
     required this.file,
   });
 }
+
 class Registercustomer extends RegisterEvent {
   final BuildContext context;
-  final String fName;
-  final String lName;
-  final String phone;
-  final String username;
+  final String name;
+  final String email;
   final String password;
-  final String? image;
+  final String cPassword; // Added confirmPassword field
+  final String? userImage;
 
   const Registercustomer({
     required this.context,
-    required this.fName,
-    required this.lName,
-    required this.phone,
-    required this.username,
+    required this.name,
+    required this.email,
     required this.password,
-    this.image,
+    required this.cPassword, // Include confirmPassword in constructor
+    this.userImage,
   });
+
+  @override
+  List<Object> get props =>
+      [context, name, email, password, cPassword, userImage ?? ''];
 }

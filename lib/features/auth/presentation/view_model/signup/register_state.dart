@@ -3,31 +3,32 @@ part of 'register_bloc.dart';
 class RegisterState extends Equatable {
   final bool isLoading;
   final bool isSuccess;
-  final String? imageName;
+  final String? userImage; // Updated to userImage
 
   const RegisterState({
     required this.isLoading,
     required this.isSuccess,
-    this.imageName,
+    this.userImage, // Using userImage instead of imageName
   });
 
   const RegisterState.initial()
       : isLoading = false,
         isSuccess = false,
-        imageName = null;
+        userImage = null; // Initialize userImage as null
 
   RegisterState copyWith({
     bool? isLoading,
     bool? isSuccess,
-    String? imageName,
+    String? userImage, // Renamed parameter to match userImage
   }) {
     return RegisterState(
       isLoading: isLoading ?? this.isLoading,
       isSuccess: isSuccess ?? this.isSuccess,
-      imageName: imageName ?? this.imageName,
+      userImage: userImage ?? this.userImage, // Updated to userImage
     );
   }
 
   @override
-  List<Object?> get props => [isLoading, isSuccess, imageName];
+  List<Object?> get props =>
+      [isLoading, isSuccess, userImage]; // Updated to userImage
 }

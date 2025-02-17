@@ -65,8 +65,8 @@ _initRegisterDependencies() {
   );
 
   // register use usecase
-  getIt.registerLazySingleton<RegisterUseCase>(
-    () => RegisterUseCase(
+  getIt.registerLazySingleton<RegisterUseUseCase>(
+    () => RegisterUseUseCase(
       getIt<AuthRemoteRepository>(),
     ),
   );

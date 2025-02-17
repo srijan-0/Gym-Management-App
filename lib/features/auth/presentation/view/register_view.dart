@@ -16,11 +16,11 @@ class RegisterView extends StatefulWidget {
 
 class _RegisterViewState extends State<RegisterView> {
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
-  final TextEditingController _fnameController = TextEditingController();
-  final TextEditingController _lnameController = TextEditingController();
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController(); // Confirm password controller
 
   // Check for camera permission
   Future<void> checkCameraPermission() async {
@@ -110,9 +110,6 @@ class _RegisterViewState extends State<RegisterView> {
                             ? FileImage(_img!)
                             : const AssetImage('assets/images/fitnest_logo.png')
                                 as ImageProvider,
-                        // backgroundImage:
-                        //     const AssetImage('assets/images/profile.png')
-                        //         as ImageProvider,
                       ),
                     ),
                   ),
@@ -132,30 +129,26 @@ class _RegisterViewState extends State<RegisterView> {
                 ),
                 const SizedBox(height: 20),
 
-                // First Name
-                _buildTextField(_fnameController, "First Name", Icons.person),
+                // Name
+                _buildTextField(_nameController, "Full Name", Icons.person),
 
                 const SizedBox(height: 16),
 
-                // Last Name
-                _buildTextField(_lnameController, "Last Name", Icons.person),
-
-                const SizedBox(height: 16),
-
-                // Username
-                _buildTextField(
-                    _usernameController, "Username", Icons.person_outline),
-
-                const SizedBox(height: 16),
-
-                // Phone Number
-                _buildTextField(_phoneController, "Phone Number", Icons.phone),
+                // Email
+                _buildTextField(_emailController, "Email", Icons.email),
 
                 const SizedBox(height: 16),
 
                 // Password
                 _buildTextField(
                     _passwordController, "Password", Icons.lock_outline,
+                    isPassword: true),
+
+                const SizedBox(height: 16),
+
+                // Confirm Password
+                _buildTextField(_confirmPasswordController, "Confirm Password",
+                    Icons.lock_outline,
                     isPassword: true),
 
                 const SizedBox(height: 20),
@@ -199,18 +192,25 @@ class _RegisterViewState extends State<RegisterView> {
                   child: ElevatedButton(
                     onPressed: () {
                       if (_key.currentState!.validate()) {
+                        if (_passwordController.text !=
+                            _confirmPasswordController.text) {
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                              content: Text("Passwords do not match")));
+                          return;
+                        }
+
                         final registerState =
                             context.read<RegisterBloc>().state;
-                        final imageName=registerState.imageName;
+                        final imageName = registerState.userImage ?? '';
+
                         context.read<RegisterBloc>().add(
                               Registercustomer(
                                 context: context,
-                                fName: _fnameController.text,
-                                lName: _lnameController.text,
-                                phone: _phoneController.text,
-                                username: _usernameController.text,
+                                name: _nameController.text,
+                                email: _emailController.text,
                                 password: _passwordController.text,
-                                image: imageName,
+                                cPassword: _confirmPasswordController.text,
+                                userImage: imageName,
                               ),
                             );
                       }
@@ -232,16 +232,12 @@ class _RegisterViewState extends State<RegisterView> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
-                // Log in Button (Instead of Back Button)
+                // Log in Button
                 Center(
                   child: TextButton(
                     onPressed: () {
-                      // Navigate to login page
-                      Navigator.pop(
-                          context); // Change to your login page navigation
+                      Navigator.pop(context); // Navigate to login page
                     },
                     child: const Text(
                       "Already have an account? Log in",
@@ -253,7 +249,6 @@ class _RegisterViewState extends State<RegisterView> {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
               ],
             ),

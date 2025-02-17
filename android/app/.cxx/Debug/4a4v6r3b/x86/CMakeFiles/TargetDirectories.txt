@@ -1,0 +1,2 @@
+C:/Users/ACER/Downloads/New folder (3)/Gym-Management-App/android/app/.cxx/Debug/4a4v6r3b/x86/CMakeFiles/edit_cache.dir
+C:/Users/ACER/Downloads/New folder (3)/Gym-Management-App/android/app/.cxx/Debug/4a4v6r3b/x86/CMakeFiles/rebuild_cache.dir

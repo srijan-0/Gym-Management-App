@@ -10,67 +10,61 @@ part 'auth_hive_model.g.dart';
 @HiveType(typeId: HiveTableConstant.customerTableId)
 class AuthHiveModel extends Equatable {
   @HiveField(0)
-  final String? customerId;
+  final String? userId;
   @HiveField(1)
-  final String fName;
+  final String name;
   @HiveField(2)
-  final String lName;
+  final String email;
   @HiveField(3)
-  final String? image;
-  @HiveField(4)
-  final String phone;
-  @HiveField(5)
-  final String username;
-  @HiveField(8)
   final String password;
+  @HiveField(4)
+  final String? userImage;
+  @HiveField(5)
+  final String cPassword; // Added confirm password
 
   AuthHiveModel({
-    String? customerId,
-    required this.fName,
-    required this.lName,
-    this.image,
-    required this.phone,
-    required this.username,
+    String? userId,
+    required this.name,
+    required this.email,
     required this.password,
-  }) : customerId = customerId ?? const Uuid().v4();
+    this.userImage,
+    required this.cPassword, // Ensure confirm password is also passed
+  }) : userId = userId ?? const Uuid().v4();
 
   // Initial Constructor
   const AuthHiveModel.initial()
-      : customerId = '',
-        fName = '',
-        lName = '',
-        image = '',
-        phone = '',
-        username = '',
-        password = '';
+      : userId = '',
+        name = '',
+        email = '',
+        password = '',
+        userImage = '',
+        cPassword = ''; // Initialize confirm password as empty
 
   // From Entity
-  factory AuthHiveModel.fromEntity(AuthEntity entity) {
+  factory AuthHiveModel.fromEntity(AuthEntity entity, String cPassword) {
     return AuthHiveModel(
-      customerId: entity.userId,
-      fName: entity.fName,
-      lName: entity.lName,
-      image: entity.image,
-      phone: entity.phone,
-      username: entity.username,
+      userId: entity.userId,
+      name: entity.name,
+      email: entity.email,
       password: entity.password,
+      userImage: entity.userImage,
+      cPassword: cPassword, // Passing confirm password here
     );
   }
 
   // To Entity
   AuthEntity toEntity() {
     return AuthEntity(
-      userId: customerId,
-      fName: fName,
-      lName: lName,
-      image: image,
-      phone: phone,
-      username: username,
+      userId: userId,
+      name: name,
+      email: email,
       password: password,
+      userImage: userImage,
+      cPassword: cPassword,
     );
   }
 
   @override
   List<Object?> get props =>
-      [customerId, fName, lName, image, username, password];
+      [userId, name, email, password, userImage, cPassword];
 }

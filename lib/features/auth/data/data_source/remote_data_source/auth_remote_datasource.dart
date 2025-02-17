@@ -20,7 +20,7 @@ class AuthRemoteDatasource implements IAuthDataSource {
       Response response = await _dio.post(
         ApiEndpoints.login,
         data: {
-          "username": username,
+          "username": username, // email as username
           "password": password,
         },
       );
@@ -29,12 +29,12 @@ class AuthRemoteDatasource implements IAuthDataSource {
         final str = response.data['token'];
         return str;
       } else {
-        throw Exception(response.statusMessage);
+        throw Exception('Failed to log in: ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      throw Exception(e);
+      throw Exception('Dio error: ${e.message}');
     } catch (e) {
-      throw Exception(e);
+      throw Exception('Unknown error: $e');
     }
   }
 
@@ -44,24 +44,24 @@ class AuthRemoteDatasource implements IAuthDataSource {
       Response response = await _dio.post(
         ApiEndpoints.register,
         data: {
-          "username": customer.username,
+          "email": customer.email, // email as username
           "password": customer.password,
-          "phone": customer.phone,
-          "fname": customer.fName,
-          "lname": customer.lName,
-          "image": customer.image,
+          "cPassword":
+              customer.cPassword, // Assuming `ePassword` for confirm password
+          "userImage": customer.userImage ?? "", // userImage (optional)
+          "name": customer.name, // Using name instead of fName & lName
         },
       );
 
       if (response.statusCode == 201) {
         return;
       } else {
-        throw Exception(response.statusMessage);
+        throw Exception('Failed to register: ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      throw Exception(e);
+      throw Exception('Dio error: ${e.message}');
     } catch (e) {
-      throw Exception(e);
+      throw Exception('Unknown error: $e');
     }
   }
 
@@ -85,12 +85,12 @@ class AuthRemoteDatasource implements IAuthDataSource {
         final str = response.data['data'];
         return str;
       } else {
-        throw Exception(response.statusMessage);
+        throw Exception('Failed to upload image: ${response.statusMessage}');
       }
     } on DioException catch (e) {
-      throw Exception(e);
+      throw Exception('Dio error: ${e.message}');
     } catch (e) {
-      throw Exception(e);
+      throw Exception('Unknown error: $e');
     }
   }
 }

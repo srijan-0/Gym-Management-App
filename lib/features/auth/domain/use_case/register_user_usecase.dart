@@ -1,57 +1,44 @@
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
-
-import '../../../../app/use_case/usecase.dart';
-import '../../../../core/error/failure.dart';
-import '../entity/auth_entity.dart';
-import '../repository/auth_repository.dart';
+import 'package:login/core/error/failure.dart';
+import 'package:login/features/auth/domain/entity/auth_entity.dart';
+import 'package:login/features/auth/domain/repository/auth_repository.dart';
 
 class RegisterUserParams extends Equatable {
-  final String fname;
-  final String lname;
-  final String phone;
-  final String username;
+  final String name;
+  final String email;
   final String password;
-  final String? image;
+  final String cPassword; // Add confirmPassword
+  final String? userImage; // Renamed to match backend
 
   const RegisterUserParams({
-    required this.fname,
-    required this.lname,
-    required this.phone,
-    required this.username,
+    required this.name,
+    required this.email,
     required this.password,
-    this.image,
+    required this.cPassword, // Make sure this is required
+    this.userImage,
   });
 
-  //intial constructor
-  const RegisterUserParams.initial({
-    required this.fname,
-    required this.lname,
-    required this.phone,
-    required this.username,
-    required this.password,
-    this.image,
-  });
+  // Initial Constructor
+  const RegisterUserParams.initial()
+      : name = '',
+        email = '',
+        password = '',
+        cPassword = '', // Add initial value for confirmPassword
+        userImage = '';
 
   @override
-  List<Object?> get props => [fname, lname, phone, username, password];
+  List<Object?> get props => [name, email, password, cPassword, userImage];
 }
 
-class RegisterUseCase implements UsecaseWithParams<void, RegisterUserParams> {
-  final IAuthRepository repository;
+class RegisterUseUseCase {
+  final IAuthRepository _authRepository;
 
-  RegisterUseCase(this.repository);
+  // Constructor to inject the repository
+  RegisterUseUseCase(this._authRepository);
 
-  @override
-  Future<Either<Failure, void>> call(RegisterUserParams params) {
-    final authEntity = AuthEntity(
-      fName: params.fname,
-      lName: params.lname,
-      phone: params.phone,
-      username: params.username,
-      password: params.password,
-      image: params.image,
-    );
-    return repository.registercustomer(authEntity);
+  Future<Either<Failure, AuthEntity>> call(RegisterUserParams params) async {
+    // We call the repository's register method and pass the params
+    return await _authRepository.register(params);
   }
 }

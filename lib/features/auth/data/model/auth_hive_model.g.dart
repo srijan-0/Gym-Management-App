@@ -17,34 +17,31 @@ class AuthHiveModelAdapter extends TypeAdapter<AuthHiveModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return AuthHiveModel(
-      customerId: fields[0] as String?,
-      fName: fields[1] as String,
-      lName: fields[2] as String,
-      image: fields[3] as String?,
-      phone: fields[4] as String,
-      username: fields[5] as String,
-      password: fields[8] as String,
+      userId: fields[0] as String?, // Updated to userId
+      name: fields[1] as String, // Mapping directly to name
+      email: fields[2] as String, // Mapping to email
+      password: fields[3] as String, // Mapping to password
+      userImage: fields[4] as String?, // Mapping to userImage
+      cPassword: fields[5] as String, // Added mapping for confirm password
     );
   }
 
   @override
   void write(BinaryWriter writer, AuthHiveModel obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(6) // Updated to 6 fields
       ..writeByte(0)
-      ..write(obj.customerId)
+      ..write(obj.userId) // Updated to userId
       ..writeByte(1)
-      ..write(obj.fName)
+      ..write(obj.name) // Updated to name
       ..writeByte(2)
-      ..write(obj.lName)
+      ..write(obj.email) // Updated to email
       ..writeByte(3)
-      ..write(obj.image)
+      ..write(obj.password) // Updated to password
       ..writeByte(4)
-      ..write(obj.phone)
+      ..write(obj.userImage) // Updated to userImage
       ..writeByte(5)
-      ..write(obj.username)
-      ..writeByte(8)
-      ..write(obj.password);
+      ..write(obj.cPassword); // Added writing for confirm password
   }
 
   @override
