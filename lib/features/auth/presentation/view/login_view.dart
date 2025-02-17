@@ -8,7 +8,7 @@ class LoginView extends StatelessWidget {
   LoginView({super.key});
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
   @override
@@ -52,11 +52,11 @@ class LoginView extends StatelessWidget {
                       key: _formKey,
                       child: Column(
                         children: [
-                          // Username Field
+                          // Email Field
                           TextFormField(
-                            controller: _usernameController,
+                            controller: _emailController,
                             decoration: InputDecoration(
-                              labelText: "Username",
+                              labelText: "Email",
                               prefixIcon: const Icon(Icons.person_outline),
                               filled: true,
                               fillColor: Colors.grey[200],
@@ -67,7 +67,7 @@ class LoginView extends StatelessWidget {
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
-                                return "Enter your username";
+                                return "Enter your email";
                               }
                               return null;
                             },
@@ -130,7 +130,7 @@ class LoginView extends StatelessWidget {
                                   context.read<LoginBloc>().add(
                                         LogincustomerEvent(
                                           context: context,
-                                          username: _usernameController.text,
+                                          email: _emailController.text,
                                           password: _passwordController.text,
                                         ),
                                       );
