@@ -1,8 +1,12 @@
+import 'package:dartz/dartz.dart' as dartz;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart'; // Import to format date and time
 import 'package:login/features/auth/data/repository/notice_repository_impl.dart';
 import 'package:login/features/auth/domain/entity/notice.dart';
+import 'package:login/features/category/data/data_sources/category_remote_data_source.dart';
+import 'package:login/features/category/data/repositories/category_repository_impl.dart';
+import 'package:login/features/category/domain/entities/category_entity.dart';
+import 'package:login/features/product/prsentation/pages/product_page.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,21 +17,52 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
-  late Future<List<Notice>> _notices;
+  late Future<List<CategoryEntity>> _categories;
+  late Future<List<Notice>> _notices; // ✅ Restored Notices
 
   @override
   void initState() {
     super.initState();
-    // Fetch notices when the screen loads
-    _notices = _fetchNotices();
+    _categories = _fetchCategories();
+    _notices = _fetchNotices(); // ✅ Fetching notices
   }
 
-  // Fetch notices from the repository
+  /// ✅ Fetch Categories
+  Future<List<CategoryEntity>> _fetchCategories() async {
+    final repository = CategoryRepositoryImpl(
+      remoteDataSource: CategoryRemoteDataSourceImpl(client: http.Client()),
+    );
+
+    final dartz.Either<String, List<CategoryEntity>> result =
+        await repository.getAllCategories();
+
+    return result.fold(
+      (failure) {
+        debugPrint("Error fetching categories: $failure");
+        return [];
+      },
+      (categories) => categories,
+    );
+  }
+
+  /// ✅ Fetch Notices
   Future<List<Notice>> _fetchNotices() async {
     final repository = NoticeRepositoryImpl(http.Client());
     return await repository.getNotices();
   }
 
+  /// ✅ Handle Category Tap → Opens Product Page with Filtered Products
+  void _onCategoryTapped(CategoryEntity category) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            ProductPage(selectedCategory: category, fromCategory: true),
+      ),
+    );
+  }
+
+  /// ✅ Handle Navigation Bar Taps
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -43,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
         ),
         centerTitle: true,
-        backgroundColor: Colors.deepPurple, // Deep Purple Theme Color
+        backgroundColor: Colors.deepPurple,
       ),
       body: _buildPageContent(),
       bottomNavigationBar: BottomNavigationBar(
@@ -53,12 +88,12 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Classes',
+            icon: Icon(Icons.category),
+            label: 'Categories',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.check_circle),
-            label: 'Attendance',
+            icon: Icon(Icons.shopping_cart),
+            label: 'Products',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
@@ -66,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.deepPurple, // Deep Purple for selected item
+        selectedItemColor: Colors.deepPurple,
         unselectedItemColor: Colors.grey,
         onTap: _onItemTapped,
         backgroundColor: Colors.white,
@@ -76,14 +111,15 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  /// ✅ Handle Different Pages Based on Navigation
   Widget _buildPageContent() {
     switch (_selectedIndex) {
       case 0:
         return _buildHomePage();
       case 1:
-        return _buildClassesPage();
+        return _buildCategoryPage();
       case 2:
-        return _buildAttendancePage();
+        return const ProductPage(); // ✅ Navigates to ProductPage
       case 3:
         return _buildProfilePage();
       default:
@@ -91,6 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  /// ✅ Home Page (Restored Notices)
   Widget _buildHomePage() {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(20),
@@ -106,17 +143,16 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 20),
-
-          // Membership Card
           Card(
-            color: Colors.deepPurple, // Deep Purple Membership Card
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+            color: Colors.deepPurple,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
+                children: [
                   Text("💳 Active Membership",
                       style: TextStyle(fontSize: 18, color: Colors.white)),
                   SizedBox(height: 8),
@@ -127,44 +163,22 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 20),
-
-          // Gym Highlights
-          const Text("🔥 Today's Highlights",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildHighlightCard("💪 Workouts Done", "3/5 Days"),
-              _buildHighlightCard("📅 Next Class", "Yoga - 6 PM"),
-            ],
-          ),
-          const SizedBox(height: 20),
-
-          // Notices Section
           const Text("📢 Latest Notices",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
 
-          // Display Notices
+          /// ✅ Notice Section Restored
           FutureBuilder<List<Notice>>(
             future: _notices,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              } else if (snapshot.hasError || snapshot.data!.isEmpty) {
                 return const Center(child: Text('No notices available.'));
               } else {
                 final notices = snapshot.data!;
                 return Column(
                   children: notices.map((notice) {
-                    // Format date
-                    // Format date and time
-                    String formattedDateTime =
-                        DateFormat('yMMMd h:mm a').format(notice.time);
-
                     return Card(
                       elevation: 3,
                       shape: RoundedRectangleBorder(
@@ -173,19 +187,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         title: Text(notice.title,
                             style: const TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.bold)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(notice.description,
-                                style: const TextStyle(fontSize: 14)),
-                            const SizedBox(height: 5),
-                            Text(
-                              "📅 $formattedDateTime",
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.grey),
-                            ),
-                          ],
-                        ),
+                        subtitle: Text(notice.description,
+                            style: const TextStyle(fontSize: 14)),
                       ),
                     );
                   }).toList(),
@@ -198,78 +201,91 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildHighlightCard(String title, String subtitle) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            Text(title,
-                style:
-                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 5),
-            Text(subtitle,
-                style: const TextStyle(fontSize: 14, color: Colors.grey)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildClassesPage() {
-    return ListView(
+  /// ✅ Categories Page
+  Widget _buildCategoryPage() {
+    return Padding(
       padding: const EdgeInsets.all(20),
-      children: [
-        const Text("📅 Upcoming Gym Classes",
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 20),
-        _buildClassItem("🔥 HIIT Workout", "Tomorrow, 7 AM"),
-        _buildClassItem("🧘 Yoga Session", "Friday, 6 PM"),
-        _buildClassItem("🏋️ Strength Training", "Sunday, 8 AM"),
-      ],
-    );
-  }
-
-  Widget _buildClassItem(String className, String schedule) {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: ListTile(
-        leading: const Icon(Icons.fitness_center, color: Colors.deepPurple),
-        title: Text(className,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        subtitle: Text(schedule),
-        trailing: ElevatedButton(
-          onPressed: () {},
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.deepPurple, // Deep Purple Button
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "📂 Explore Categories",
+            style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurple),
           ),
-          child: const Text("Join", style: TextStyle(color: Colors.white)),
-        ),
+          const SizedBox(height: 10),
+          const Text(
+            "Select a category to view products and get tailored suggestions for your fitness journey.",
+            style: TextStyle(fontSize: 14, color: Colors.black87),
+          ),
+          const SizedBox(height: 20),
+          FutureBuilder<List<CategoryEntity>>(
+            future: _categories,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError || snapshot.data!.isEmpty) {
+                return const Center(child: Text('No categories available.'));
+              } else {
+                final categories = snapshot.data!;
+                return GridView.builder(
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 1.5,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                  ),
+                  itemCount: categories.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () => _onCategoryTapped(categories[index]),
+                      child: _buildCategoryCard(categories[index]),
+                    );
+                  },
+                );
+              }
+            },
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildAttendancePage() {
-    return Center(
+  Widget _buildCategoryCard(CategoryEntity category) {
+    String imageUrl =
+        "http://10.0.2.2:8000/uploads/categories/${category.cImage}";
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      elevation: 4,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text("✅ Attendance Tracker",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 20),
-          const Text("Workouts Completed: 3/5 this week",
-              style: TextStyle(fontSize: 18, color: Colors.grey)),
+          Image.network(imageUrl, height: 60,
+              errorBuilder: (context, error, stackTrace) {
+            return const Icon(Icons.image_not_supported,
+                size: 60, color: Colors.grey);
+          }),
           const SizedBox(height: 10),
-          ElevatedButton(
-            onPressed: () {},
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.deepPurple),
-            child: const Text("Mark Attendance",
-                style: TextStyle(color: Colors.white)),
+          Text(category.cName,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple)),
+          const SizedBox(height: 5),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+              category.cDescription,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ),
         ],
       ),
@@ -277,22 +293,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildProfilePage() {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text("👤 Profile",
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 20),
-          const Text("Name: John Doe", style: TextStyle(fontSize: 18)),
-          const SizedBox(height: 10),
-          const Text("Membership: Gold Plan", style: TextStyle(fontSize: 18)),
-          const SizedBox(height: 10),
-          const Text("Expires: 15th March 2025",
-              style: TextStyle(fontSize: 18)),
-        ],
-      ),
-    );
+    return const Center(child: Text("Profile Page"));
   }
 }
