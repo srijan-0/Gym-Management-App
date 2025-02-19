@@ -3,17 +3,26 @@ import 'package:flutter/material.dart';
 class HeaderWidget extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool showBackButton;
+  final List<Widget>? actions; // ✅ Add this parameter
 
-  const HeaderWidget(
-      {super.key, required this.title, this.showBackButton = true});
+  const HeaderWidget({
+    super.key,
+    required this.title,
+    this.showBackButton = false,
+    this.actions, // ✅ Accept actions
+  });
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      automaticallyImplyLeading: showBackButton, // ✅ Hide Back Button if needed
       title: Text(title),
-      backgroundColor: Colors.deepPurple,
-      centerTitle: true,
+      leading: showBackButton
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            )
+          : null,
+      actions: actions, // ✅ Assign actions to AppBar
     );
   }
 

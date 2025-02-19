@@ -5,9 +5,11 @@ import 'package:http/http.dart' as http;
 import '../models/cart_model.dart';
 
 abstract class CartRemoteDataSource {
-  Future<List<CartModel>> getCartItems();
   Future<void> addToCart(CartModel cartItem);
-  Future<void> removeFromCart(String productId);
+
+  getCartItems() {}
+
+  removeFromCart(String productId) {}
 }
 
 class CartRemoteDataSourceImpl implements CartRemoteDataSource {
@@ -17,23 +19,17 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   CartRemoteDataSourceImpl({required this.client});
 
   @override
-  Future<List<CartModel>> getCartItems() async {
-    final response = await client.get(Uri.parse("${baseUrl}order-by-user"));
-
-    if (response.statusCode == 200) {
-      List<dynamic> data = jsonDecode(response.body)['Order'];
-      return data.map((json) => CartModel.fromJson(json)).toList();
-    } else {
-      throw Exception("Failed to fetch cart items");
-    }
-  }
-
-  @override
   Future<void> addToCart(CartModel cartItem) async {
     final response = await client.post(
       Uri.parse("${baseUrl}create-order"),
       body: jsonEncode({
-        "allProduct": [cartItem.toJson()]
+        "allProduct": [
+          {"id": cartItem.productId, "quantity": cartItem.quantity}
+        ],
+        "user": "USER_ID", // Replace with actual user ID
+        "amount": cartItem.price * cartItem.quantity,
+        "address": "User Address", // Replace with actual address
+        "phone": "User Phone" // Replace with actual phone number
       }),
       headers: {"Content-Type": "application/json"},
     );
@@ -44,15 +40,14 @@ class CartRemoteDataSourceImpl implements CartRemoteDataSource {
   }
 
   @override
-  Future<void> removeFromCart(String productId) async {
-    final response = await client.post(
-      Uri.parse("${baseUrl}delete-order"),
-      body: jsonEncode({"oId": productId}),
-      headers: {"Content-Type": "application/json"},
-    );
+  getCartItems() {
+    // TODO: implement getCartItems
+    throw UnimplementedError();
+  }
 
-    if (response.statusCode != 200) {
-      throw Exception("Failed to remove item from cart");
-    }
+  @override
+  removeFromCart(String productId) {
+    // TODO: implement removeFromCart
+    throw UnimplementedError();
   }
 }
