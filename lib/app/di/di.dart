@@ -1,10 +1,21 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:http/http.dart' as http;
 import 'package:login/app/shared_prefs/token_shared_prefs.dart';
 import 'package:login/core/network/api_service.dart';
 import 'package:login/features/auth/data/data_source/remote_data_source/auth_remote_datasource.dart';
 import 'package:login/features/auth/data/repository/auth_remote_repository.dart';
 import 'package:login/features/auth/domain/use_case/upload_image_usecase.dart';
+import 'package:login/features/cart/data/data_sources/cart_remote_data_source.dart'; // ✅ Added
+import 'package:login/features/cart/data/repositories/cart_repository_impl.dart';
+import 'package:login/features/cart/domain/repositories/cart_repository.dart';
+import 'package:login/features/cart/domain/usecases/add_to_cart.dart';
+import 'package:login/features/cart/domain/usecases/get_cart_items.dart';
+import 'package:login/features/cart/domain/usecases/remove_from_cart.dart';
+import 'package:login/features/category/data/data_sources/category_remote_data_source.dart';
+import 'package:login/features/category/data/repositories/category_repository_impl.dart';
+import 'package:login/features/category/domain/usecases/get_all_categories.dart';
+import 'package:login/features/category/presentation/bloc/category_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/network/hive_service.dart';
@@ -18,36 +29,96 @@ import '../../features/home/presentation/view_model/home_cubit.dart';
 
 final getIt = GetIt.instance;
 
-Future<void> initDependencies() async {
-  // First initialize hive service
-  await _initHiveService();
-  await _initApiService();
+/// ✅ Initialize all dependencies before using them
+Future<void> initAllDependencies() async {
+  _initHiveService();
+  _initApiService();
   await _initSharedPreferences();
-  await _initHomeDependencies();
-  await _initRegisterDependencies();
-  await _initLoginDependencies();
-
-  // await _initSplashScreenDependencies();
+  _initHomeDependencies();
+  _initRegisterDependencies();
+  _initLoginDependencies();
 }
 
-Future<void> _initSharedPreferences() async {
-  final sharedPreferences = await SharedPreferences.getInstance();
-  getIt.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
+/// ✅ Setup Cart Dependencies
+void setupCartDependencies() {
+  // ✅ Register HTTP Client
+  getIt.registerLazySingleton<http.Client>(() => http.Client());
+
+  // ✅ Register Cart Remote Data Source
+  getIt.registerLazySingleton<CartRemoteDataSource>(
+    () => CartRemoteDataSourceImpl(client: getIt<http.Client>()),
+  );
+
+  // ✅ Register Repository
+  getIt.registerLazySingleton<CartRepository>(
+    () => CartRepositoryImpl(remoteDataSource: getIt<CartRemoteDataSource>()),
+  );
+
+  // ✅ Register Use Cases
+  getIt.registerLazySingleton<GetCartItemsUseCase>(
+    () => GetCartItemsUseCase(getIt<CartRepository>()),
+  );
+
+  getIt.registerLazySingleton<AddToCartUseCase>(
+    () => AddToCartUseCase(getIt<CartRepository>()),
+  );
+
+  getIt.registerLazySingleton<RemoveFromCartUseCase>(
+    () => RemoveFromCartUseCase(getIt<CartRepository>()),
+  );
+
+  // ✅ Register Bloc
 }
 
-_initApiService() {
-  // Remote Data Source
+Future<void> initDependencies() async {
+  _initHiveService();
+  _initApiService();
+  await _initSharedPreferences();
+  _initHomeDependencies();
+  _initRegisterDependencies();
+  _initLoginDependencies();
+  _initCategoryDependencies(); // ✅ Register CategoryBloc
+}
+
+void _initCategoryDependencies() {
+  getIt.registerLazySingleton<CategoryRemoteDataSource>(
+    () => CategoryRemoteDataSourceImpl(client: getIt<http.Client>()),
+  );
+
+  getIt.registerLazySingleton<CategoryRepositoryImpl>(
+    () => CategoryRepositoryImpl(
+        remoteDataSource: getIt<CategoryRemoteDataSource>()),
+  );
+
+  getIt.registerLazySingleton<GetAllCategories>(
+    () => GetAllCategories(getIt<CategoryRepositoryImpl>()),
+  );
+
+  getIt.registerLazySingleton<CategoryBloc>(
+    () => CategoryBloc(getAllCategories: getIt<GetAllCategories>()),
+  );
+}
+
+/// ✅ Initialize API Service before using it
+void _initApiService() {
   getIt.registerLazySingleton<Dio>(
     () => ApiService(Dio()).dio,
   );
 }
 
-_initHiveService() {
+/// ✅ Initialize Hive Service
+void _initHiveService() {
   getIt.registerLazySingleton<HiveService>(() => HiveService());
 }
 
-_initRegisterDependencies() {
-  // init local data source
+/// ✅ Register Shared Preferences
+Future<void> _initSharedPreferences() async {
+  final sharedPreferences = await SharedPreferences.getInstance();
+  getIt.registerLazySingleton<SharedPreferences>(() => sharedPreferences);
+}
+
+/// ✅ Register Authentication Dependencies
+void _initRegisterDependencies() {
   getIt.registerLazySingleton(
     () => AuthLocalDataSource(getIt<HiveService>()),
   );
@@ -56,24 +127,20 @@ _initRegisterDependencies() {
     () => AuthRemoteDatasource(getIt<Dio>()),
   );
 
-  // init local repository
-  getIt.registerLazySingleton(
+  getIt.registerLazySingleton<AuthLocalRepository>(
     () => AuthLocalRepository(getIt<AuthLocalDataSource>()),
   );
+
   getIt.registerLazySingleton<AuthRemoteRepository>(
     () => AuthRemoteRepository(getIt<AuthRemoteDatasource>()),
   );
 
-  // register use usecase
   getIt.registerLazySingleton<RegisterUseUseCase>(
-    () => RegisterUseUseCase(
-      getIt<AuthRemoteRepository>(),
-    ),
+    () => RegisterUseUseCase(getIt<AuthRemoteRepository>()),
   );
+
   getIt.registerLazySingleton<UploadImageUsecase>(
-    () => UploadImageUsecase(
-      getIt<AuthRemoteRepository>(),
-    ),
+    () => UploadImageUsecase(getIt<AuthRemoteRepository>()),
   );
 
   getIt.registerFactory<RegisterBloc>(
@@ -84,14 +151,15 @@ _initRegisterDependencies() {
   );
 }
 
-_initHomeDependencies() async {
+/// ✅ Register Home Dependencies
+void _initHomeDependencies() {
   getIt.registerFactory<HomeCubit>(
     () => HomeCubit(),
   );
 }
 
-_initLoginDependencies() async {
-  // =========================== Token Shared Preferences ===========================
+/// ✅ Register Login Dependencies
+void _initLoginDependencies() {
   getIt.registerLazySingleton<TokenSharedPrefs>(
     () => TokenSharedPrefs(getIt<SharedPreferences>()),
   );
@@ -111,9 +179,3 @@ _initLoginDependencies() async {
     ),
   );
 }
-
-// _initSplashScreenDependencies() async {
-//   getIt.registerFactory<SplashCubit>(
-//     () => SplashCubit(getIt<LoginBloc>()),
-//   );
-// }

@@ -3,17 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:login/core/layout/footer_widget.dart';
 import 'package:login/core/layout/header_widget.dart';
+import 'package:login/features/cart/presentation/pages/cart_manager.dart';
+import 'package:login/features/cart/presentation/pages/cart_page.dart';
 import 'package:login/features/category/data/data_sources/category_remote_data_source.dart';
 import 'package:login/features/category/data/repositories/category_repository_impl.dart';
 import 'package:login/features/category/domain/entities/category_entity.dart';
-import 'package:login/features/home/presentation/view/home_screen.dart';
 import 'package:login/features/product/data/data_sources/product_remote_data_source.dart';
 import 'package:login/features/product/data/repositories/product_repository_impl.dart';
 import 'package:login/features/product/domain/entities/product_entity.dart';
 
 class ProductPage extends StatefulWidget {
   final CategoryEntity? selectedCategory;
-  final bool fromCategory; // ✅ New Parameter
+  final bool fromCategory;
 
   const ProductPage(
       {super.key, this.selectedCategory, this.fromCategory = false});
@@ -26,7 +27,6 @@ class _ProductPageState extends State<ProductPage> {
   late Future<List<ProductEntity>> _products;
   late Future<List<CategoryEntity>> _categories;
   CategoryEntity? _selectedCategory;
-  final int _selectedIndex = 2; // ✅ Default to "Products" in Navigation
 
   @override
   void initState() {
@@ -63,6 +63,13 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
+  void _onCategorySelected(CategoryEntity? category) {
+    setState(() {
+      _selectedCategory = category;
+      _products = _fetchProducts(categoryId: category?.id);
+    });
+  }
+
   Future<List<ProductEntity>> _fetchProducts({String? categoryId}) async {
     final repository = ProductRepositoryImpl(
       remoteDataSource: ProductRemoteDataSourceImpl(client: http.Client()),
@@ -87,37 +94,27 @@ class _ProductPageState extends State<ProductPage> {
     );
   }
 
-  void _onCategorySelected(CategoryEntity? category) {
-    setState(() {
-      _selectedCategory = category;
-      _products = _fetchProducts(categoryId: category?.id);
-    });
+  void _addToCart(ProductEntity product) {
+    CartManager().addToCart(product);
+    setState(() {}); // Refresh UI
   }
 
-  void _onItemTapped(int index) {
-    if (index == 0 || index == 3) {
-      // Home or Profile
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              HomeScreen(), // ✅ Ensure this exists in your imports
-        ),
-        (route) => false, // Removes all previous routes from stack
-      );
-    } else if (index == 1) {
-      // Categories
-      Navigator.pop(context); // ✅ Works as expected
-    } else if (index == 2) {
-      // Products
-      // Do nothing, already on Products page
-    }
+  void _navigateToCart() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => CartPage()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const HeaderWidget(title: "Products", showBackButton: false),
+      appBar: HeaderWidget(title: "Products", showBackButton: false, actions: [
+        IconButton(
+          icon: const Icon(Icons.shopping_cart),
+          onPressed: _navigateToCart,
+        ),
+      ]),
       body: Column(
         children: [
           Padding(
@@ -136,8 +133,7 @@ class _ProductPageState extends State<ProductPage> {
                     decoration: InputDecoration(
                       labelText: "Select Category",
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                          borderRadius: BorderRadius.circular(10)),
                     ),
                     items: categories.map((category) {
                       return DropdownMenuItem<CategoryEntity>(
@@ -151,33 +147,6 @@ class _ProductPageState extends State<ProductPage> {
               },
             ),
           ),
-          if (_selectedCategory != null && _selectedCategory!.id.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _selectedCategory!.cName,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    _selectedCategory!.cDescription,
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "🛒 Suggested Products",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
           Expanded(
             child: FutureBuilder<List<ProductEntity>>(
               future: _products,
@@ -208,18 +177,21 @@ class _ProductPageState extends State<ProductPage> {
           ),
         ],
       ),
-      bottomNavigationBar: widget.fromCategory
-          ? FooterWidget(
-              currentIndex: 2,
-              onItemTapped: _onItemTapped) // ✅ Show navbar if from category
-          : null, // ✅ Hide navbar if navigated directly
+      bottomNavigationBar: FooterWidget(
+        currentIndex: 2,
+        onItemTapped: (index) {
+          if (index == 3) {
+            _navigateToCart();
+          }
+        },
+      ),
     );
   }
 
-  /// **✅ Function to Display Product Cards**
   Widget _buildProductCard(ProductEntity product) {
-    final imageUrl =
-        "http://10.0.2.2:8000/uploads/products/${product.images.isNotEmpty ? product.images[0] : 'default.jpg'}";
+    final imageUrl = product.images.isNotEmpty
+        ? "http://10.0.2.2:8000/uploads/products/${product.images[0]}"
+        : "http://10.0.2.2:8000/uploads/products/default.jpg";
 
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -239,35 +211,25 @@ class _ProductPageState extends State<ProductPage> {
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Text(
-              product.name,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Text(
-              "Category: ${product.categoryName}",
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              "\$${product.price}",
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+            child: Column(
+              children: [
+                Text(product.name,
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepPurple)),
+                Text("Category: ${product.categoryName}",
+                    style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                Text("\$${product.price}",
+                    style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black)),
+                ElevatedButton(
+                  onPressed: () => _addToCart(product),
+                  child: const Text("Add to Cart"),
+                ),
+              ],
             ),
           ),
         ],

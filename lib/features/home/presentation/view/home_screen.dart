@@ -1,8 +1,10 @@
 import 'package:dartz/dartz.dart' as dartz;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:login/core/layout/footer_widget.dart';
 import 'package:login/features/auth/data/repository/notice_repository_impl.dart';
 import 'package:login/features/auth/domain/entity/notice.dart';
+import 'package:login/features/cart/presentation/pages/cart_page.dart';
 import 'package:login/features/category/data/data_sources/category_remote_data_source.dart';
 import 'package:login/features/category/data/repositories/category_repository_impl.dart';
 import 'package:login/features/category/domain/entities/category_entity.dart';
@@ -18,13 +20,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   late Future<List<CategoryEntity>> _categories;
-  late Future<List<Notice>> _notices; // ✅ Restored Notices
+  late Future<List<Notice>> _notices;
 
   @override
   void initState() {
     super.initState();
     _categories = _fetchCategories();
-    _notices = _fetchNotices(); // ✅ Fetching notices
+    _notices = _fetchNotices();
   }
 
   /// ✅ Fetch Categories
@@ -81,32 +83,9 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.deepPurple,
       ),
       body: _buildPageContent(),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.fitness_center),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.category),
-            label: 'Categories',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Products',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+      bottomNavigationBar: FooterWidget(
         currentIndex: _selectedIndex,
-        selectedItemColor: Colors.deepPurple,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
-        backgroundColor: Colors.white,
-        type: BottomNavigationBarType.fixed,
-        elevation: 10,
+        onItemTapped: _onItemTapped,
       ),
     );
   }
@@ -119,9 +98,9 @@ class _HomeScreenState extends State<HomeScreen> {
       case 1:
         return _buildCategoryPage();
       case 2:
-        return const ProductPage(); // ✅ Navigates to ProductPage
+        return const ProductPage();
       case 3:
-        return _buildProfilePage();
+        return const CartPage();
       default:
         return _buildHomePage();
     }
@@ -143,31 +122,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 20),
-          Card(
-            color: Colors.deepPurple,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("💳 Active Membership",
-                      style: TextStyle(fontSize: 18, color: Colors.white)),
-                  SizedBox(height: 8),
-                  Text("Gold Plan - Expires: 15th March 2025",
-                      style: TextStyle(fontSize: 16, color: Colors.white70)),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
           const Text("📢 Latest Notices",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 10),
 
-          /// ✅ Notice Section Restored
+          /// ✅ Notice Section
           FutureBuilder<List<Notice>>(
             future: _notices,
             builder: (context, snapshot) {
@@ -195,6 +154,45 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// ✅ Build Category Card Widget
+  Widget _buildCategoryCard(CategoryEntity category) {
+    String imageUrl =
+        "http://10.0.2.2:8000/uploads/categories/${category.cImage}";
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      elevation: 4,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.network(imageUrl, height: 60,
+              errorBuilder: (context, error, stackTrace) {
+            return const Icon(Icons.image_not_supported,
+                size: 60, color: Colors.grey);
+          }),
+          const SizedBox(height: 10),
+          Text(category.cName,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepPurple)),
+          const SizedBox(height: 5),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: Text(
+              category.cDescription,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+            ),
           ),
         ],
       ),
@@ -252,47 +250,5 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
     );
-  }
-
-  Widget _buildCategoryCard(CategoryEntity category) {
-    String imageUrl =
-        "http://10.0.2.2:8000/uploads/categories/${category.cImage}";
-
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      elevation: 4,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.network(imageUrl, height: 60,
-              errorBuilder: (context, error, stackTrace) {
-            return const Icon(Icons.image_not_supported,
-                size: 60, color: Colors.grey);
-          }),
-          const SizedBox(height: 10),
-          Text(category.cName,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepPurple)),
-          const SizedBox(height: 5),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text(
-              category.cDescription,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfilePage() {
-    return const Center(child: Text("Profile Page"));
   }
 }
