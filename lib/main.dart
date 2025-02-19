@@ -11,6 +11,7 @@ void main() async {
   // await HiveService().clearStudentBox();
 
   await initDependencies();
+  setupCartDependencies();
 
   runApp(
     App(),
