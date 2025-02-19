@@ -10,39 +10,52 @@ class CartRepositoryImpl implements CartRepository {
 
   CartRepositoryImpl({required this.remoteDataSource});
 
+  /// **🛒 Add Product to Cart**
+  @override
+  Future<Either<String, void>> addToCart(CartEntity cartItem) async {
+    try {
+      await remoteDataSource.addToCart(
+        CartModel(
+          productId: cartItem.productId,
+          productName: cartItem.productName, // ✅ Fix: Use `productName`
+          productImage: cartItem.productImage, // ✅ Fix: Use `productImage`
+          quantity: cartItem.quantity,
+          price: cartItem.price,
+        ),
+      );
+      return const Right(null);
+    } catch (e) {
+      return Left("Failed to add to cart: ${e.toString()}");
+    }
+  }
+
+  /// **🛒 Get Cart Items**
   @override
   Future<Either<String, List<CartEntity>>> getCartItems() async {
     try {
       final items = await remoteDataSource.getCartItems();
-      return Right(items);
+      return Right(items
+          .map((model) => CartEntity(
+                productId: model.productId,
+                productName: model.productName,
+                productImage: model.productImage,
+                quantity: model.quantity,
+                price: model.price,
+              ))
+          .toList());
     } catch (e) {
-      return Left("Failed to fetch cart items");
+      return Left("Failed to fetch cart items: ${e.toString()}");
     }
   }
 
-  @override
-  Future<Either<String, void>> addToCart(CartEntity cartItem) async {
-    try {
-      await remoteDataSource.addToCart(CartModel(
-        productId: cartItem.productId,
-        productName: cartItem.productName,
-        productImage: cartItem.productImage,
-        quantity: cartItem.quantity,
-        price: cartItem.price,
-      ));
-      return const Right(null);
-    } catch (e) {
-      return Left("Failed to add to cart");
-    }
-  }
-
+  /// **🗑️ Remove Product from Cart**
   @override
   Future<Either<String, void>> removeFromCart(String productId) async {
     try {
       await remoteDataSource.removeFromCart(productId);
       return const Right(null);
     } catch (e) {
-      return Left("Failed to remove from cart");
+      return Left("Failed to remove from cart: ${e.toString()}");
     }
   }
 }
