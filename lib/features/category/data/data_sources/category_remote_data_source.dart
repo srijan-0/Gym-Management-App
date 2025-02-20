@@ -11,7 +11,9 @@ abstract class CategoryRemoteDataSource {
 
 class CategoryRemoteDataSourceImpl implements CategoryRemoteDataSource {
   final http.Client client;
-  static const String baseUrl = "http://10.0.2.2:8000/api/category/";
+  static const String baseUrl =
+      "http://10.0.2.2:8000/api/category/"; // For emulator
+  // static const String baseUrl = "http://192.168.101.4:8000/api/category/";
 
   // ✅ Correct constructor initialization
   CategoryRemoteDataSourceImpl({required this.client});
