@@ -1,8 +1,8 @@
 class Notice {
-  final String id; // Added the id field
+  final String id;
   final String title;
   final String description;
-  final DateTime time;
+  final DateTime time; // ✅ Ensure this is always a valid DateTime
 
   Notice({
     required this.id,
@@ -11,24 +11,30 @@ class Notice {
     required this.time,
   });
 
-  // From JSON to Notice object
+  /// ✅ Convert JSON to Notice object
   factory Notice.fromJson(Map<String, dynamic> json) {
     return Notice(
-      id: json['_id'], // Added _id field
-      title: json['title'],
-      description: json['description'],
-      time: DateTime.parse(json['time']), // Parsing the time correctly
+      id: json['_id'] ?? '', // Ensure id is always a valid string
+      title: json['title'] ?? 'No Title',
+      description: json['description'] ?? 'No Description',
+      time: _parseDate(json), // ✅ Ensure DateTime is correctly parsed
     );
   }
 
-  // To JSON
-  Map<String, dynamic> toJson() {
-    return {
-      '_id': id, // Adding _id field to JSON
-      'title': title,
-      'description': description,
-      'time':
-          time.toIso8601String(), // Converting time to ISO 8601 string format
-    };
+  /// ✅ Helper function to parse date safely
+  static DateTime _parseDate(Map<String, dynamic> json) {
+    try {
+      if (json['time'] != null && json['time'].toString().isNotEmpty) {
+        return DateTime.parse(json['time']); // ✅ Use `time` if available
+      } else if (json['createdAt'] != null &&
+          json['createdAt'].toString().isNotEmpty) {
+        return DateTime.parse(json['createdAt']); // ✅ Fallback to `createdAt`
+      } else {
+        return DateTime
+            .now(); // ✅ Fallback to current time (to prevent crashes)
+      }
+    } catch (e) {
+      return DateTime.now(); // ✅ In case of errors, use current time
+    }
   }
 }
