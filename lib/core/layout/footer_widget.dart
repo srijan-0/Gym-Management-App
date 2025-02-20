@@ -47,7 +47,7 @@ class FooterWidget extends StatelessWidget {
     return BottomNavigationBar(
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
-          icon: Icon(Icons.fitness_center),
+          icon: Icon(Icons.home),
           label: 'Home',
         ),
         BottomNavigationBarItem(
@@ -55,11 +55,11 @@ class FooterWidget extends StatelessWidget {
           label: 'Categories',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart),
+          icon: Icon(Icons.production_quantity_limits),
           label: 'Products',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.person),
+          icon: Icon(Icons.shopping_cart),
           label: 'Cart',
         ),
       ],
@@ -67,7 +67,7 @@ class FooterWidget extends StatelessWidget {
       selectedItemColor: Colors.deepPurple,
       unselectedItemColor: Colors.grey,
       onTap: (index) => _navigateToPage(context, index),
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       type: BottomNavigationBarType.fixed,
       elevation: 10,
     );
