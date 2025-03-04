@@ -15,7 +15,6 @@ class LoginParams extends Equatable {
     required this.password,
   });
 
-  // Initial Constructor
   const LoginParams.initial()
       : email = '',
         password = '';
@@ -38,7 +37,6 @@ class LoginUseCase implements UsecaseWithParams<String, LoginParams> {
       (failure) => Left(failure),
       (token) async {
         // Await saving the token
-        final saveResult = await tokenSharedPrefs.saveToken(token);
         return Right(token);
       },
     );

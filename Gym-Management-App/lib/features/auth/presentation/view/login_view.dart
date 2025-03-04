@@ -14,7 +14,7 @@ class LoginView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100], // Soft background color
+      backgroundColor: Colors.grey[100],
       body: Center(
         child: SingleChildScrollView(
           child: Padding(
