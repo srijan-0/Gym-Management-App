@@ -21,6 +21,11 @@ class CartManager {
     _cartItems.add(product);
   }
 
+  // Clear all items from the cart
+  void clearCart() {
+    _cartItems.clear();
+  }
+
   // Remove item from cart
   void removeFromCart(ProductEntity product) {
     _cartItems.remove(product);

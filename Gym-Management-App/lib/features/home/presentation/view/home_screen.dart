@@ -29,11 +29,11 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
   late Future<List<CategoryEntity>> _categories;
   late Future<List<Notice>> _notices;
-  late Future<int> _daysLeftForRenewal;
   double _waterIntake = 0.0;
   final double _dailyGoal = 3.0;
   int _steps = 0;
@@ -44,15 +44,25 @@ class _HomeScreenState extends State<HomeScreen> {
   DateTime? _lastShakeTime;
   static const Duration _shakeCooldown = Duration(seconds: 2);
 
+  late AnimationController _animationController;
+  late Animation<double> _fadeAnimation;
+
   @override
   void initState() {
-    _loadWaterIntake();
     super.initState();
+    _loadWaterIntake();
     _categories = _fetchCategories();
     _notices = _fetchNotices();
     _loadSteps();
-    _daysLeftForRenewal = _fetchMembershipDaysLeft();
     _initShakeDetection();
+
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+    _fadeAnimation =
+        CurvedAnimation(parent: _animationController, curve: Curves.easeInOut);
+    _animationController.forward();
   }
 
   void _initShakeDetection() {
@@ -77,16 +87,22 @@ class _HomeScreenState extends State<HomeScreen> {
     bool confirm = await showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: const Text('Logout'),
-            content: const Text('Are you sure you want to logout?'),
+            backgroundColor: Colors.grey[900],
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            title: const Text('Logout', style: TextStyle(color: Colors.white)),
+            content: const Text('Are you sure you want to logout?',
+                style: TextStyle(color: Colors.white70)),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
-                child: const Text('Cancel'),
+                child:
+                    const Text('Cancel', style: TextStyle(color: Colors.grey)),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(context, true),
-                child: const Text('Yes'),
+                child: const Text('Yes',
+                    style: TextStyle(color: Colors.blueAccent)),
               ),
             ],
           ),
@@ -97,9 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
       try {
         print('Clearing login data from SharedPreferences');
         SharedPreferences prefs = await SharedPreferences.getInstance();
-        // Remove only login-related data (adjust key as per your app)
-        await prefs.remove(
-            'user_token'); // Replace 'user_token' with your actual login key
+        await prefs.remove('user_token');
         print('Login data cleared, preserving steps and water intake');
 
         if (mounted) {
@@ -119,21 +133,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadSteps() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _steps = prefs.getInt('steps') ?? 0;
-    });
+    setState(() => _steps = prefs.getInt('steps') ?? 0);
   }
 
   Future<void> _loadWaterIntake() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _waterIntake = prefs.getDouble('water_intake') ?? 0.0;
-    });
-  }
-
-  Future<int> _fetchMembershipDaysLeft() async {
-    await Future.delayed(const Duration(seconds: 1));
-    return 28;
+    setState(() => _waterIntake = prefs.getDouble('water_intake') ?? 0.0);
   }
 
   Future<List<CategoryEntity>> _fetchCategories() async {
@@ -155,15 +160,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return await repository.getNotices();
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
   @override
   void dispose() {
     _accelerometerSubscription?.cancel();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -171,19 +173,23 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        automaticallyImplyLeading: false,
+        title: Text(
           'Welcome Srijan',
-          style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2),
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1.5,
+            color: Colors.white,
+            fontSize: MediaQuery.of(context).size.width > 600 ? 24 : 20,
+          ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: const Color(0xFF121212),
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.notifications,
-              size: 28,
-              color: Colors.black,
-            ),
+            icon:
+                const Icon(Icons.notifications, size: 28, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,
@@ -195,20 +201,22 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           if (kDebugMode)
             IconButton(
-              icon: const Icon(
-                Icons.logout,
-                size: 28,
-                color: Colors.black,
-              ),
+              icon: const Icon(Icons.logout, size: 28, color: Colors.white),
               onPressed: _handleLogout,
               tooltip: 'Debug Logout (Emulator Only)',
             ),
         ],
       ),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          return _buildPageContent(constraints);
-        },
+      body: Container(
+        color: const Color(0xFF121212),
+        child: SafeArea(
+          bottom: false,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return _buildPageContent(constraints);
+            },
+          ),
+        ),
       ),
       bottomNavigationBar: FooterWidget(
         currentIndex: _selectedIndex,
@@ -238,7 +246,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+        padding:
+            EdgeInsets.symmetric(horizontal: isTablet ? 30 : 15, vertical: 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -250,28 +259,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     children: [
                       _buildStepProgress(),
-                      const SizedBox(height: 15),
-                      _buildMembershipBox(height: 100),
+                      SizedBox(height: isTablet ? 20 : 10),
+                      _buildMembershipBox(height: isTablet ? 120 : 100),
                     ],
                   ),
                 ),
-                const SizedBox(width: 15),
                 SizedBox(
-                  width: 120,
-                  child: _buildWaterBottle(height: isTablet ? 150 : 200),
+                  width: isTablet ? 140 : 100,
+                  child: _buildWaterBottle(height: isTablet ? 280 : 200),
                 ),
               ],
             ),
-            const SizedBox(height: 30),
+            SizedBox(height: 0),
             GridView.builder(
               shrinkWrap: true,
               padding: EdgeInsets.zero,
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: isTablet ? 4 : 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: isTablet ? 1.2 : 1.0,
+                crossAxisSpacing: isTablet ? 15 : 10,
+                mainAxisSpacing: isTablet ? 15 : 10,
+                childAspectRatio:
+                    isTablet ? 0.9 : 0.8, // Adjusted for taller boxes
               ),
               itemCount: 4,
               itemBuilder: (context, index) {
@@ -279,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   {
                     "icon": Icons.calculate,
                     "title": "BMI Calculator",
-                    "color": Colors.blue.shade100,
+                    "color": Colors.blue.shade800,
                     "action": () {
                       Navigator.push(
                           context,
@@ -290,19 +299,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   {
                     "icon": Icons.category,
                     "title": "Categories",
-                    "color": Colors.orange.shade100,
+                    "color": Colors.orange.shade800,
                     "action": () => _onItemTapped(1)
                   },
                   {
                     "icon": Icons.shopping_bag,
                     "title": "Products",
-                    "color": Colors.green.shade100,
+                    "color": Colors.green.shade800,
                     "action": () => _onItemTapped(2)
                   },
                   {
                     "icon": Icons.shopping_cart,
                     "title": "Cart",
-                    "color": Colors.red.shade100,
+                    "color": Colors.red.shade800,
                     "action": () => _onItemTapped(3)
                   },
                 ];
@@ -312,11 +321,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   gridItems[index]["title"],
                   gridItems[index]["color"],
                   gridItems[index]["action"],
-                  height: isTablet ? 120 : 140,
+                  height: isTablet ? 130 : 110, // Updated height
                 );
               },
             ),
-            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -335,55 +343,69 @@ class _HomeScreenState extends State<HomeScreen> {
         ).then((_) => _loadSteps());
       },
       child: Center(
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            SizedBox(
-              height: 140,
-              width: 140,
-              child: PieChart(
-                PieChartData(
-                  sections: [
-                    PieChartSectionData(
-                      value: progress * 100,
-                      radius: 12,
-                      color: Colors.green,
-                      showTitle: false,
-                    ),
-                    PieChartSectionData(
-                      value: (1 - progress) * 100,
-                      radius: 12,
-                      color: Colors.red,
-                      showTitle: false,
-                    ),
-                  ],
-                  sectionsSpace: 0,
-                  centerSpaceRadius: 50,
+        child: Container(
+          padding: const EdgeInsets.all(15),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+                colors: [Colors.red.shade800, Colors.red.shade600]),
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4))
+            ],
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                height: 140,
+                width: 140,
+                child: PieChart(
+                  PieChartData(
+                    sections: [
+                      PieChartSectionData(
+                        value: progress * 100,
+                        radius: 12,
+                        color: Colors.white,
+                        showTitle: false,
+                      ),
+                      PieChartSectionData(
+                        value: (1 - progress) * 100,
+                        radius: 12,
+                        color: Colors.black,
+                        showTitle: false,
+                      ),
+                    ],
+                    sectionsSpace: 1,
+                    centerSpaceRadius: 50,
+                  ),
                 ),
               ),
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  _steps.toString(),
-                  style: const TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _steps.toString(),
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-                const Text(
-                  "STEPS",
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
+                  Text(
+                    "STEPS",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white70,
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -402,26 +424,26 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Container(
         height: height,
         decoration: BoxDecoration(
-          color: Colors.deepPurple.shade50,
+          color: Colors.grey.shade900,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.deepPurple, width: 1),
+          border: Border.all(color: Colors.blue.shade400, width: 1),
         ),
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            const Icon(Icons.notifications_active, color: Colors.deepPurple),
+            Icon(Icons.notifications_active, color: Colors.blue.shade400),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
+                  Text(
                     "Latest Notices",
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
+                      color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -429,15 +451,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     future: _notices,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Text("Loading latest notices...");
+                        return Text("Loading latest notices...",
+                            style: TextStyle(color: Colors.white70));
                       } else if (snapshot.hasError || snapshot.data!.isEmpty) {
-                        return const Text("No notices available.");
+                        return Text("No notices available.",
+                            style: TextStyle(color: Colors.white70));
                       } else {
                         return Text(
                           snapshot.data!.first.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 14),
+                          style: TextStyle(fontSize: 14, color: Colors.white70),
                         );
                       }
                     },
@@ -445,15 +469,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
-            const Icon(Icons.arrow_forward_ios,
-                size: 18, color: Colors.deepPurple),
+            Icon(Icons.arrow_forward_ios,
+                size: 18, color: Colors.blue.shade400),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildWaterBottle({double height = 240}) {
+  Widget _buildWaterBottle({double height = 200}) {
     double fillHeight = (_waterIntake / _dailyGoal) * height;
 
     return GestureDetector(
@@ -466,9 +490,10 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const Text(
+          Text(
             "Water Intake",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 8),
           Stack(
@@ -478,15 +503,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: 90,
                 height: height,
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blue, width: 3),
                   borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.blue.shade400, width: 3),
+                  color: Colors.grey.shade900,
                 ),
               ),
-              Container(
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 500),
                 width: 90,
                 height: fillHeight.clamp(0, height),
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade300,
+                  gradient: LinearGradient(
+                      colors: [Colors.blue.shade400, Colors.blue.shade600]),
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
@@ -495,35 +523,42 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 6),
           Text(
             "${_waterIntake.toStringAsFixed(1)}L / $_dailyGoal L",
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildMembershipBox({double height = 130}) {
+  Widget _buildMembershipBox({double height = 100}) {
     return Container(
       height: height,
       decoration: BoxDecoration(
-        color: Colors.green.shade50,
+        gradient: LinearGradient(
+            colors: [Colors.green.shade800, Colors.green.shade600]),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.green, width: 1),
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4))
+        ],
       ),
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          const Icon(Icons.card_membership, color: Colors.green),
+          Icon(Icons.card_membership, color: Colors.white),
           const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text("Membership Renewal",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                Text("Days left: 28",
-                    style: TextStyle(color: Colors.green.shade700)),
+                Text("Membership Renewal",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.white)),
+                Text("Days left: 28", style: TextStyle(color: Colors.white70)),
               ],
             ),
           ),
@@ -536,22 +571,29 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isTablet = screenWidth > 600;
 
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.symmetric(
+          horizontal: isTablet ? 30 : 15, vertical: isTablet ? 20 : 10),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "📂 Explore Categories",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: isTablet ? 24 : 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white),
           ),
-          const SizedBox(height: 10),
+          SizedBox(height: isTablet ? 15 : 10),
           FutureBuilder<List<CategoryEntity>>(
             future: _categories,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
+                return Center(
+                    child: CircularProgressIndicator(color: Colors.white));
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text('No categories available.'));
+                return Center(
+                    child: Text('No categories available.',
+                        style: TextStyle(color: Colors.white70)));
               }
 
               final categories = snapshot.data!;
@@ -559,9 +601,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 shrinkWrap: true,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: isTablet ? 3 : 2,
-                  childAspectRatio: 1.5,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
+                  childAspectRatio: isTablet ? 1.8 : 1.5,
+                  crossAxisSpacing: isTablet ? 15 : 10,
+                  mainAxisSpacing: isTablet ? 15 : 10,
                 ),
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
@@ -577,44 +619,57 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCategoryCard(CategoryEntity category) {
     return Card(
-      child: ListTile(
-        title: Text(category.cName),
-        subtitle: Text(category.cDescription),
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+              colors: [Colors.purple.shade800, Colors.purple.shade600]),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: ListTile(
+          title: Text(category.cName,
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          subtitle: Text(category.cDescription,
+              style: TextStyle(color: Colors.white70)),
+        ),
       ),
     );
   }
 
   Widget _buildHomeOptionBox(
       IconData icon, String title, Color color, VoidCallback onTap,
-      {double height = 110}) {
+      {double height = 100}) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: height,
         decoration: BoxDecoration(
-          color: color,
+          gradient: LinearGradient(colors: [
+            color,
+            color.withOpacity(0.7),
+          ]),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 5,
-              spreadRadius: 2,
-              offset: const Offset(2, 3),
-            ),
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 6,
+                offset: const Offset(0, 3))
           ],
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 36, color: Colors.black87),
-            const SizedBox(height: 10),
+            Icon(icon, size: 30, color: Colors.white),
+            const SizedBox(height: 8),
             Text(
               title,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
+              style: TextStyle(
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Colors.black87,
+                color: Colors.white,
               ),
             ),
           ],

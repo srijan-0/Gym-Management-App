@@ -37,8 +37,8 @@ class _NoticeListPageState extends State<NoticeListPage> {
                 itemCount: notices.length,
                 itemBuilder: (context, index) {
                   bool isExpanded = _expandedMap[index] ?? false;
-                  String noticeText = notices[index].description ??
-                      "No description available"; // ✅ Prevent null issues
+                  String noticeText =
+                      notices[index].description; // ✅ Prevent null issues
 
                   return Card(
                     elevation: 3,

@@ -148,17 +148,6 @@ class _CategoryPageState extends State<CategoryPage> {
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                   color: Colors.deepPurple)),
-          const SizedBox(height: 5),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Text(
-              category.cDescription,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: Colors.grey),
-            ),
-          ),
         ],
       ),
     );
