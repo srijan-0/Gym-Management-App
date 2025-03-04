@@ -53,3 +53,37 @@ class HiveService {
     await Hive.close();
   }
 }
+
+// import 'package:hive/hive.dart';
+
+// class HiveService {
+//   // Assuming you have a Hive box for customer data (user profile, token, etc.)
+//   // If not already open, ensure to open it before using (perhaps in your app init).
+//   static const String _customerBoxName = 'customerBox';
+//   late Box _customerBox;
+
+//   HiveService() {
+//     // Open the Hive box (synchronously or use async init if needed)
+//     _customerBox = Hive.box(_customerBoxName);
+//   }
+
+//   /// Save auth token to Hive storage
+//   Future<void> saveToken(String token) async {
+//     await _customerBox.put('token', token);
+//   }
+
+//   /// Retrieve the saved auth token (or null if not present)
+//   String? getToken() {
+//     return _customerBox.get('token');
+//   }
+
+//   /// Remove the auth token from storage
+//   Future<void> clearToken() async {
+//     await _customerBox.delete('token');
+//   }
+
+//   /// Clear all customer data from the Hive box (e.g. on full logout)
+//   Future<void> clearCustomerBox() async {
+//     await _customerBox.clear();
+//   }
+// }

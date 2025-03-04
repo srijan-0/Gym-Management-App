@@ -52,3 +52,27 @@ class AuthLocalDataSource implements IAuthDataSource {
     throw UnimplementedError();
   }
 }
+
+// import 'package:login/core/network/hive_service.dart';
+
+// class AuthLocalDataSource {
+//   final HiveService _hiveService;
+
+//   AuthLocalDataSource(this._hiveService);
+
+//   Future<void> saveToken(String token) async {
+//     await _hiveService.saveToken(token);
+//   }
+
+//   String? getToken() {
+//     return _hiveService.getToken();
+//   }
+
+//   Future<void> clearToken() async {
+//     await _hiveService.clearToken();
+//   }
+
+//   Future<void> clearCustomerBox() async {
+//     await _hiveService.clearCustomerBox();
+//   }
+// }
