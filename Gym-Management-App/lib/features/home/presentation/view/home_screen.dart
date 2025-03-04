@@ -183,7 +183,7 @@ class _HomeScreenState extends State<HomeScreen>
             fontSize: MediaQuery.of(context).size.width > 600 ? 24 : 20,
           ),
         ),
-        centerTitle: true,
+        // centerTitle: true,
         backgroundColor: const Color(0xFF121212),
         elevation: 0,
         actions: [
@@ -280,7 +280,7 @@ class _HomeScreenState extends State<HomeScreen>
                 crossAxisSpacing: isTablet ? 15 : 10,
                 mainAxisSpacing: isTablet ? 15 : 10,
                 childAspectRatio:
-                    isTablet ? 0.9 : 0.8, // Adjusted for taller boxes
+                    isTablet ? 0.95 : 0.85, // Adjusted for taller boxes
               ),
               itemCount: 4,
               itemBuilder: (context, index) {
@@ -321,7 +321,7 @@ class _HomeScreenState extends State<HomeScreen>
                   gridItems[index]["title"],
                   gridItems[index]["color"],
                   gridItems[index]["action"],
-                  height: isTablet ? 130 : 110, // Updated height
+                  height: isTablet ? 110 : 90, // Updated height
                 );
               },
             ),

@@ -5,6 +5,7 @@ import 'package:login/features/category/presentation/bloc/category_bloc.dart';
 import 'package:login/features/category/presentation/pages/category_page.dart';
 import 'package:login/features/home/presentation/view/home_screen.dart';
 import 'package:login/features/product/prsentation/pages/product_page.dart';
+import 'package:lucide_icons/lucide_icons.dart';
 
 class FooterWidget extends StatelessWidget {
   final int currentIndex;
@@ -15,13 +16,9 @@ class FooterWidget extends StatelessWidget {
 
   void _navigateToPage(BuildContext context, int index) {
     if (index == currentIndex) return;
-
-    Widget page = _getPage(context, index); // ✅ Correctly gets the page widget
-
+    Widget page = _getPage(context, index);
     Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => page),
-    );
+        context, MaterialPageRoute(builder: (context) => page));
   }
 
   Widget _getPage(BuildContext context, int index) {
@@ -30,13 +27,12 @@ class FooterWidget extends StatelessWidget {
         return const HomeScreen();
       case 1:
         return BlocProvider.value(
-          value: BlocProvider.of<CategoryBloc>(context),
-          child: const CategoryPage(),
-        );
+            value: BlocProvider.of<CategoryBloc>(context),
+            child: const CategoryPage());
       case 2:
         return const ProductPage();
       case 3:
-        return const CartPage(); // ✅ FIX: Return CartPage instead of using Navigator.push()
+        return const CartPage();
       default:
         return const HomeScreen();
     }
@@ -44,32 +40,56 @@ class FooterWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.category),
-          label: 'Categories',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.production_quantity_limits),
-          label: 'Products',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart),
-          label: 'Cart',
-        ),
-      ],
-      currentIndex: currentIndex,
-      selectedItemColor: Colors.deepPurple,
-      unselectedItemColor: Colors.grey,
-      onTap: (index) => _navigateToPage(context, index),
-      backgroundColor: Colors.black,
-      type: BottomNavigationBarType.fixed,
-      elevation: 10,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black, // ✅ Full solid black background
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 6,
+              offset: const Offset(0, -2)), // ✅ Adds shadow effect
+        ],
+      ),
+      child: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(currentIndex == 0 ? LucideIcons.home : LucideIcons.home,
+                size: 28,
+                color: currentIndex == 0 ? Colors.white : Colors.grey),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+                currentIndex == 1 ? LucideIcons.layers : LucideIcons.layoutGrid,
+                size: 28,
+                color: currentIndex == 1 ? Colors.white : Colors.grey),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+                currentIndex == 2 ? LucideIcons.package : LucideIcons.box,
+                size: 28,
+                color: currentIndex == 2 ? Colors.white : Colors.grey),
+            label: '',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(
+                currentIndex == 3
+                    ? LucideIcons.shoppingCart
+                    : LucideIcons.shoppingCart,
+                size: 28,
+                color: currentIndex == 3 ? Colors.white : Colors.grey),
+            label: '',
+          ),
+        ],
+        currentIndex: currentIndex,
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.grey,
+        backgroundColor: Colors.black, // ✅ Ensure full black background
+        type: BottomNavigationBarType.fixed,
+        elevation: 0,
+        onTap: (index) => _navigateToPage(context, index),
+      ),
     );
   }
 }

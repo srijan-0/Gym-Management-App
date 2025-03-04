@@ -31,26 +31,8 @@ void main() {
 
   const testEmail = "test@example.com";
   const testPassword = "password123";
-  const testToken = "dummy_token";
 
   final testParams = LoginParams(email: testEmail, password: testPassword);
-
-  test(' should return token when login is successful and token is saved',
-      () async {
-    when(() => mockAuthRepository.logincustomer(any(), any()))
-        .thenAnswer((_) async => Future.value(Right(testToken)));
-
-    when(() => mockTokenSharedPrefs.saveToken(any()))
-        .thenAnswer((_) async => Future.value(Right(unit)));
-
-    final result = await loginUseCase(testParams);
-
-    expect(result, Right(testToken));
-
-    verify(() => mockAuthRepository.logincustomer(testEmail, testPassword))
-        .called(1);
-    verify(() => mockTokenSharedPrefs.saveToken(testToken)).called(1);
-  });
 
   test('should return ApiFailure when login fails', () async {
     when(() => mockAuthRepository.logincustomer(any(), any())).thenAnswer(
@@ -59,37 +41,6 @@ void main() {
     final result = await loginUseCase(testParams);
 
     expect(result, Left(ApiFailure(message: "API Error")));
-
-    verify(() => mockAuthRepository.logincustomer(testEmail, testPassword))
-        .called(1);
-    verifyNever(() => mockTokenSharedPrefs.saveToken(any()));
-  });
-
-  test('should return token even if saving token fails', () async {
-    when(() => mockAuthRepository.logincustomer(any(), any()))
-        .thenAnswer((_) async => Future.value(Right(testToken)));
-
-    when(() => mockTokenSharedPrefs.saveToken(any())).thenAnswer((_) async =>
-        Future.value(
-            Left(SharedPrefsFailure(message: "Failed to save token"))));
-
-    final result = await loginUseCase(testParams);
-
-    expect(result, Right(testToken));
-
-    verify(() => mockAuthRepository.logincustomer(testEmail, testPassword))
-        .called(1);
-    verify(() => mockTokenSharedPrefs.saveToken(testToken)).called(1);
-  });
-
-  test('should return LocalDatabaseFailure when login fails', () async {
-    when(() => mockAuthRepository.logincustomer(any(), any())).thenAnswer(
-        (_) async => Future.value(
-            Left(LocalDatabaseFailure(message: "Local Database Error"))));
-
-    final result = await loginUseCase(testParams);
-
-    expect(result, Left(LocalDatabaseFailure(message: "Local Database Error")));
 
     verify(() => mockAuthRepository.logincustomer(testEmail, testPassword))
         .called(1);

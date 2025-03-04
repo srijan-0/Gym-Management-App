@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:login/features/auth/domain/use_case/login_usecase.dart';
 import 'package:login/features/auth/presentation/view_model/login/login_bloc.dart';
@@ -20,7 +19,6 @@ void main() {
   late MockLoginUseCase mockLoginUseCase;
   late MockRegisterBloc mockRegisterBloc;
   late MockHomeCubit mockHomeCubit;
-  late BuildContext fakeContext;
 
   setUpAll(() {
     registerFallbackValue(
@@ -32,7 +30,7 @@ void main() {
     mockLoginUseCase = MockLoginUseCase();
     mockRegisterBloc = MockRegisterBloc();
     mockHomeCubit = MockHomeCubit();
-    fakeContext = FakeBuildContext() as BuildContext; // ✅ Use Fake Context
+// ✅ Use Fake Context
 
     loginBloc = LoginBloc(
       registerBloc: mockRegisterBloc,

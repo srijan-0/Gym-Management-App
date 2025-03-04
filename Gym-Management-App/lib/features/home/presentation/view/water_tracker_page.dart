@@ -9,8 +9,8 @@ class WaterTrackerPage extends StatefulWidget {
 }
 
 class _WaterTrackerPageState extends State<WaterTrackerPage> {
-  double _waterIntake = 0.0; // Current water intake
-  final double _dailyGoal = 3.0; // 3L daily goal
+  double _waterIntake = 0.0;
+  final double _dailyGoal = 3.0;
 
   @override
   void initState() {
@@ -18,7 +18,6 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> {
     _loadWaterIntake();
   }
 
-  /// ✅ Load Water Intake from Storage
   Future<void> _loadWaterIntake() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -26,22 +25,19 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> {
     });
   }
 
-  /// ✅ Save Water Intake
   Future<void> _saveWaterIntake() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setDouble('water_intake', _waterIntake);
   }
 
-  /// ✅ Add Water Intake (250ml, 500ml)
   void _addWater(double amount) {
     setState(() {
       _waterIntake += amount;
-      if (_waterIntake > _dailyGoal) _waterIntake = _dailyGoal; // Limit to goal
+      if (_waterIntake > _dailyGoal) _waterIntake = _dailyGoal;
     });
     _saveWaterIntake();
   }
 
-  /// ✅ Reset Water Intake
   void _resetWaterIntake() {
     setState(() {
       _waterIntake = 0.0;
@@ -52,14 +48,17 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        title: const Text("Water Tracker"),
-        backgroundColor: Colors.deepPurple,
+        title: const Text(
+          "Water Tracker",
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.deepPurple.shade900,
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _resetWaterIntake, // Reset button
-            tooltip: "Reset Water Intake",
+            icon: const Icon(Icons.refresh, color: Colors.white70),
+            onPressed: _resetWaterIntake,
           ),
         ],
       ),
@@ -70,11 +69,12 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> {
           children: [
             const Text(
               "Daily Water Intake Goal",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
             const SizedBox(height: 10),
-
-            /// ✅ Progress Bar
             Stack(
               alignment: Alignment.center,
               children: [
@@ -84,8 +84,8 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> {
                   child: CircularProgressIndicator(
                     value: _waterIntake / _dailyGoal,
                     strokeWidth: 10,
-                    backgroundColor: Colors.grey.shade300,
-                    color: Colors.blue,
+                    backgroundColor: Colors.grey.shade800,
+                    color: Colors.blueAccent,
                   ),
                 ),
                 Column(
@@ -93,19 +93,19 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> {
                     Text(
                       "${_waterIntake.toStringAsFixed(1)}L",
                       style: const TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold),
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
                     ),
                     Text(
                       "of $_dailyGoal L",
-                      style: const TextStyle(fontSize: 16, color: Colors.grey),
+                      style: TextStyle(fontSize: 16, color: Colors.white70),
                     ),
                   ],
                 ),
               ],
             ),
             const SizedBox(height: 20),
-
-            /// ✅ Add Water Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -119,17 +119,17 @@ class _WaterTrackerPageState extends State<WaterTrackerPage> {
     );
   }
 
-  /// ✅ Water Intake Buttons
   Widget _buildWaterButton(String label, double amount) {
     return ElevatedButton(
       onPressed: () => _addWater(amount),
       style: ElevatedButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 30),
-        backgroundColor: Colors.blue.shade300,
+        backgroundColor: Colors.blueGrey.shade700,
       ),
       child: Text(
         label,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        style: const TextStyle(
+            fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
       ),
     );
   }

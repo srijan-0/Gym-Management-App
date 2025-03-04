@@ -107,16 +107,21 @@ class _ProductPageState extends State<ProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: HeaderWidget(title: "Products", showBackButton: false, actions: [
-        IconButton(
-          icon: const Icon(Icons.shopping_cart),
-          onPressed: _navigateToCart,
-        ),
-      ]),
+      backgroundColor: const Color(0xFF121212),
+      appBar: HeaderWidget(
+        title: "Products",
+        titleColor: Colors.white,
+        showBackButton: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart, color: Colors.white),
+            onPressed: _navigateToCart,
+          ),
+        ],
+      ),
       body: LayoutBuilder(
         builder: (context, constraints) {
           int crossAxisCount = constraints.maxWidth > 600 ? 3 : 2;
-          double cardAspectRatio = constraints.maxWidth > 600 ? 0.8 : 0.75;
 
           return Column(
             children: [
@@ -126,23 +131,31 @@ class _ProductPageState extends State<ProductPage> {
                   future: _categories,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(
+                          child: CircularProgressIndicator(
+                              color: Colors.deepPurpleAccent));
                     } else if (snapshot.hasError || snapshot.data!.isEmpty) {
                       return const Center(
-                          child: Text('No categories available.'));
+                          child: Text('No categories available.',
+                              style: TextStyle(color: Colors.white70)));
                     } else {
                       final categories = snapshot.data!;
                       return DropdownButtonFormField<CategoryEntity>(
                         value: _selectedCategory ?? categories[0],
                         decoration: InputDecoration(
                           labelText: "Select Category",
+                          labelStyle: const TextStyle(color: Colors.white70),
                           border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10)),
+                          filled: true,
+                          fillColor: Colors.grey[900],
                         ),
+                        dropdownColor: Colors.grey[900],
                         items: categories.map((category) {
                           return DropdownMenuItem<CategoryEntity>(
                             value: category,
-                            child: Text(category.cName),
+                            child: Text(category.cName,
+                                style: const TextStyle(color: Colors.white)),
                           );
                         }).toList(),
                         onChanged: _onCategorySelected,
@@ -156,10 +169,13 @@ class _ProductPageState extends State<ProductPage> {
                   future: _products,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(
+                          child: CircularProgressIndicator(
+                              color: Colors.deepPurpleAccent));
                     } else if (snapshot.hasError || snapshot.data!.isEmpty) {
                       return const Center(
-                          child: Text('No products available.'));
+                          child: Text('No products available.',
+                              style: TextStyle(color: Colors.white70)));
                     } else {
                       final products = snapshot.data!;
                       return GridView.builder(
@@ -168,7 +184,8 @@ class _ProductPageState extends State<ProductPage> {
                           crossAxisCount: crossAxisCount,
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
-                          childAspectRatio: cardAspectRatio,
+                          childAspectRatio: 0.7,
+                          mainAxisExtent: 260,
                         ),
                         itemCount: products.length,
                         itemBuilder: (context, index) {
@@ -202,17 +219,23 @@ class _ProductPageState extends State<ProductPage> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 4,
+      color: Colors.grey[900],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return const Icon(Icons.image_not_supported,
-                    size: 60, color: Colors.grey);
-              },
+            child: ClipRRect(
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                errorBuilder: (_, __, ___) => const Icon(
+                    Icons.image_not_supported,
+                    size: 60,
+                    color: Colors.white70),
+              ),
             ),
           ),
           Padding(
@@ -220,21 +243,25 @@ class _ProductPageState extends State<ProductPage> {
             child: Column(
               children: [
                 Text(product.name,
+                    textAlign: TextAlign.center,
                     style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.deepPurple)),
+                        color: Colors.white)),
+                const SizedBox(height: 4),
                 Text("Category: ${product.categoryName}",
-                    style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                    style:
+                        const TextStyle(fontSize: 14, color: Colors.white70)),
+                const SizedBox(height: 4),
                 Text("\$${product.price}",
                     style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black)),
+                        color: Colors.greenAccent)),
+                const SizedBox(height: 6),
                 ElevatedButton(
-                  onPressed: () => _addToCart(product),
-                  child: const Text("Add to Cart"),
-                ),
+                    onPressed: () => _addToCart(product),
+                    child: const Text("Add to Cart")),
               ],
             ),
           ),

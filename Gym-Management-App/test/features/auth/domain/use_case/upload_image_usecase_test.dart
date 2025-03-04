@@ -29,7 +29,6 @@ void main() {
 
       final result = await uploadImageUsecase(params);
 
-      // Assert: Verify that the result is the expected image URL.
       expect(result, equals(const Right(imageUrl)));
       verify(() => mockAuthRepository.uploadProfilePicture(dummyFile))
           .called(1);
