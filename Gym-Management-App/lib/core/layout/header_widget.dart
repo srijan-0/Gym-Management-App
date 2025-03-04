@@ -8,7 +8,7 @@ class HeaderWidget extends StatelessWidget implements PreferredSizeWidget {
   const HeaderWidget({
     super.key,
     required this.title,
-    this.showBackButton = false,
+    this.showBackButton = true,
     this.actions, // ✅ Accept actions
   });
 
