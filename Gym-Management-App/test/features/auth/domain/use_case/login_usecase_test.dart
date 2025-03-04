@@ -1,93 +1,98 @@
-// import 'package:dartz/dartz.dart';
-// import 'package:flutter_test/flutter_test.dart';
-// import 'package:login/core/error/failure.dart';
-// import 'package:login/features/auth/domain/use_case/login_usecase.dart';
-// import 'package:login/features/auth/domain/use_case/repository.mock.dart';
-// import 'package:login/features/auth/domain/use_case/token.mock.dart';
-// import 'package:mocktail/mocktail.dart';
+import 'package:dartz/dartz.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:login/app/shared_prefs/token_shared_prefs.dart';
+import 'package:login/core/error/failure.dart';
+import 'package:login/features/auth/domain/repository/auth_repository.dart';
+import 'package:login/features/auth/domain/use_case/login_usecase.dart';
+import 'package:mocktail/mocktail.dart';
 
-// void main() {
-//   late MockBatchRepository mockAuthRepository;
-//   late MockTokenSharedPrefs mockTokenSharedPrefs;
-//   late LoginUseCase loginUseCase;
+class MockAuthRepository extends Mock implements IAuthRepository {}
 
-//   setUp(() {
-//     mockAuthRepository = MockBatchRepository();
-//     mockTokenSharedPrefs = MockTokenSharedPrefs();
-//     loginUseCase = LoginUseCase(mockAuthRepository, mockTokenSharedPrefs);
+class MockTokenSharedPrefs extends Mock implements TokenSharedPrefs {}
 
-//     registerFallbackValue(LoginParams(username: '', password: ''));
-//   });
+void main() {
+  late LoginUseCase loginUseCase;
+  late MockAuthRepository mockAuthRepository;
+  late MockTokenSharedPrefs mockTokenSharedPrefs;
 
-//   group('LoginUseCase', () {
-//     test('Should save token when login is successful', () async {
-//       const params = LoginParams(username: 'srijan', password: 'srijan');
-//       const mockToken = 'sample_token';
+  setUpAll(() {
+    registerFallbackValue(ApiFailure(message: "API Failure"));
+    registerFallbackValue(
+        LocalDatabaseFailure(message: "Local Database Failure"));
+    registerFallbackValue(
+        SharedPrefsFailure(message: "Shared Preferences Failure"));
+  });
 
-//       when(() => mockAuthRepository.logincustomer(
-//               params.username, params.password))
-//           .thenAnswer((_) async => const Right(mockToken));
+  setUp(() {
+    mockAuthRepository = MockAuthRepository();
+    mockTokenSharedPrefs = MockTokenSharedPrefs();
+    loginUseCase = LoginUseCase(mockAuthRepository, mockTokenSharedPrefs);
+  });
 
-//       when(() => mockTokenSharedPrefs.saveToken(mockToken))
-//           .thenAnswer((_) async => Right(unit));
+  const testEmail = "test@example.com";
+  const testPassword = "password123";
+  const testToken = "dummy_token";
 
-//       final result = await loginUseCase(params);
+  final testParams = LoginParams(email: testEmail, password: testPassword);
 
-//       expect(result, equals(const Right(mockToken)));
+  test(' should return token when login is successful and token is saved',
+      () async {
+    when(() => mockAuthRepository.logincustomer(any(), any()))
+        .thenAnswer((_) async => Future.value(Right(testToken)));
 
-//       verify(() => mockAuthRepository.logincustomer(
-//           params.username, params.password)).called(1);
-//       verify(() => mockTokenSharedPrefs.saveToken(mockToken)).called(1);
-//     });
+    when(() => mockTokenSharedPrefs.saveToken(any()))
+        .thenAnswer((_) async => Future.value(Right(unit)));
 
-//     test('Should return ApiFailure when login fails', () async {
-//       const params = LoginParams(username: 'testuser', password: 'wrongpass');
+    final result = await loginUseCase(testParams);
 
-//       when(() => mockAuthRepository.logincustomer(
-//               params.username, params.password))
-//           .thenAnswer((_) async =>
-//               Left(ApiFailure(message: 'Login failed due to server error')));
+    expect(result, Right(testToken));
 
-//       final result = await loginUseCase(params);
+    verify(() => mockAuthRepository.logincustomer(testEmail, testPassword))
+        .called(1);
+    verify(() => mockTokenSharedPrefs.saveToken(testToken)).called(1);
+  });
 
-//       expect(result, isA<Left>());
-//       expect(
-//           result,
-//           equals(
-//               Left(ApiFailure(message: 'Login failed due to server error'))));
+  test('should return ApiFailure when login fails', () async {
+    when(() => mockAuthRepository.logincustomer(any(), any())).thenAnswer(
+        (_) async => Future.value(Left(ApiFailure(message: "API Error"))));
 
-//       verify(() => mockAuthRepository.logincustomer(
-//           params.username, params.password)).called(1);
-//       verifyNever(() => mockTokenSharedPrefs.saveToken(any()));
-//     });
+    final result = await loginUseCase(testParams);
 
-//     test(
-//       'Should retrieve the token from shared preferences after successful login',
-//       () async {
-//         const params = LoginParams(username: 'srijan', password: 'srijan');
-//         const mockToken = 'sample_token';
+    expect(result, Left(ApiFailure(message: "API Error")));
 
-//         when(() => mockAuthRepository.logincustomer(
-//                 params.username, params.password))
-//             .thenAnswer((_) async => const Right(mockToken));
+    verify(() => mockAuthRepository.logincustomer(testEmail, testPassword))
+        .called(1);
+    verifyNever(() => mockTokenSharedPrefs.saveToken(any()));
+  });
 
-//         when(() => mockTokenSharedPrefs.saveToken(mockToken))
-//             .thenAnswer((_) async => Right(unit));
+  test('should return token even if saving token fails', () async {
+    when(() => mockAuthRepository.logincustomer(any(), any()))
+        .thenAnswer((_) async => Future.value(Right(testToken)));
 
-//         when(() => mockTokenSharedPrefs.getToken())
-//             .thenAnswer((_) async => Right(mockToken));
+    when(() => mockTokenSharedPrefs.saveToken(any())).thenAnswer((_) async =>
+        Future.value(
+            Left(SharedPrefsFailure(message: "Failed to save token"))));
 
-//         final result = await loginUseCase(params);
+    final result = await loginUseCase(testParams);
 
-//         expect(result, equals(const Right(mockToken)));
+    expect(result, Right(testToken));
 
-//         verify(() => mockAuthRepository.logincustomer(
-//             params.username, params.password)).called(1);
+    verify(() => mockAuthRepository.logincustomer(testEmail, testPassword))
+        .called(1);
+    verify(() => mockTokenSharedPrefs.saveToken(testToken)).called(1);
+  });
 
-//         verify(() => mockTokenSharedPrefs.saveToken(mockToken)).called(1);
+  test('should return LocalDatabaseFailure when login fails', () async {
+    when(() => mockAuthRepository.logincustomer(any(), any())).thenAnswer(
+        (_) async => Future.value(
+            Left(LocalDatabaseFailure(message: "Local Database Error"))));
 
-//         verify(() => mockTokenSharedPrefs.getToken()).called(1);
-//       },
-//     );
-//   });
-// }
+    final result = await loginUseCase(testParams);
+
+    expect(result, Left(LocalDatabaseFailure(message: "Local Database Error")));
+
+    verify(() => mockAuthRepository.logincustomer(testEmail, testPassword))
+        .called(1);
+    verifyNever(() => mockTokenSharedPrefs.saveToken(any()));
+  });
+}

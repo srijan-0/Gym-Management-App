@@ -7,7 +7,6 @@ import 'package:login/features/auth/domain/repository/auth_repository.dart';
 import 'package:login/features/auth/domain/use_case/upload_image_usecase.dart';
 import 'package:mocktail/mocktail.dart';
 
-// Create a mock class for IAuthRepository using mocktail
 class MockAuthRepository extends Mock implements IAuthRepository {}
 
 void main() {
