@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:login/features/home/presentation/view/bmi_calculator_page.dart';
 
 void main() {
-  /// ✅ Helper function to create the testable widget
   Widget createTestableWidget() {
     return const MaterialApp(home: BMICalculatorPage());
   }

@@ -1,45 +1,97 @@
+import 'package:bloc_test/bloc_test.dart';
+import 'package:dartz/dartz.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:login/core/error/failure.dart';
 import 'package:login/features/auth/domain/use_case/login_usecase.dart';
 import 'package:login/features/auth/presentation/view_model/login/login_bloc.dart';
 import 'package:login/features/auth/presentation/view_model/signup/register_bloc.dart';
 import 'package:login/features/home/presentation/view_model/home_cubit.dart';
 import 'package:mocktail/mocktail.dart';
 
-// ✅ Mock classes
-class MockLoginUseCase extends Mock implements LoginUseCase {}
-
 class MockRegisterBloc extends Mock implements RegisterBloc {}
 
 class MockHomeCubit extends Mock implements HomeCubit {}
 
-class FakeBuildContext extends Fake {}
+class MockLoginUseCase extends Mock implements LoginUseCase {}
+
+class MockBuildContext extends Mock implements BuildContext {}
+
+class MockFailure extends Mock implements Failure {}
+
+class MockNavigatorObserver extends Mock implements NavigatorObserver {}
 
 void main() {
   late LoginBloc loginBloc;
-  late MockLoginUseCase mockLoginUseCase;
   late MockRegisterBloc mockRegisterBloc;
   late MockHomeCubit mockHomeCubit;
-
-  setUpAll(() {
-    registerFallbackValue(
-        LoginParams(email: "test@test.com", password: "password123"));
-    registerFallbackValue(FakeBuildContext()); // ✅ Register Fake Context
-  });
+  late MockLoginUseCase mockLoginUseCase;
+  late MockBuildContext mockContext;
+  late MockFailure mockFailure;
 
   setUp(() {
-    mockLoginUseCase = MockLoginUseCase();
     mockRegisterBloc = MockRegisterBloc();
     mockHomeCubit = MockHomeCubit();
-// ✅ Use Fake Context
+    mockLoginUseCase = MockLoginUseCase();
+    mockContext = MockBuildContext();
+    mockFailure = MockFailure();
 
     loginBloc = LoginBloc(
       registerBloc: mockRegisterBloc,
       homeCubit: mockHomeCubit,
       loginUseCase: mockLoginUseCase,
     );
+
+    registerFallbackValue(
+        LoginParams(email: 'test@example.com', password: 'password'));
   });
 
   tearDown(() {
     loginBloc.close();
   });
+  blocTest<LoginBloc, LoginState>(
+    'Emits failure state when login fails',
+    build: () {
+      when(() => mockLoginUseCase(any()))
+          .thenAnswer((_) async => Left(mockFailure));
+      return loginBloc;
+    },
+    act: (bloc) => bloc.add(
+      LogincustomerEvent(
+        context: mockContext,
+        email: 'wrong@example.com',
+        password: 'wrongpassword',
+      ),
+    ),
+    expect: () => [
+      LoginState.initial().copyWith(isLoading: true),
+      LoginState.initial().copyWith(isLoading: false, isSuccess: false),
+    ],
+    verify: (_) {
+      verifyNever(() => Navigator.pushReplacement(any(), any()));
+    },
+  );
+
+  blocTest<LoginBloc, LoginState>(
+    'Emits success state when login succeeds and prevents navigation error',
+    build: () {
+      when(() => mockLoginUseCase(any()))
+          .thenAnswer((_) async => Right("mock_token"));
+      return loginBloc;
+    },
+    act: (bloc) => bloc.add(
+      LogincustomerEvent(
+        context: mockContext,
+        email: 'test@example.com',
+        password: 'password',
+      ),
+    ),
+    expect: () => [
+      LoginState.initial().copyWith(isLoading: true),
+      LoginState.initial().copyWith(isLoading: false, isSuccess: true),
+    ],
+    verify: (_) {
+      verifyNever(() => Navigator.pushReplacement(any(), any()));
+    },
+  );
 }

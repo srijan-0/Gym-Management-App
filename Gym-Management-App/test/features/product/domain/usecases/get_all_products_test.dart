@@ -5,7 +5,6 @@ import 'package:login/features/product/domain/repositories/product_repository.da
 import 'package:login/features/product/domain/usecases/get_all_products.dart';
 import 'package:mocktail/mocktail.dart';
 
-/// Mock Class
 class MockProductRepository extends Mock implements ProductRepository {}
 
 void main() {
