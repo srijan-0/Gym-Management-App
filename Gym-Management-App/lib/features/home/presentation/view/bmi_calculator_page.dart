@@ -20,7 +20,10 @@ class _BMICalculatorPageState extends State<BMICalculatorPage> {
 
     if (weight == null || height == null || height == 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter valid numbers!")),
+        SnackBar(
+          content: const Text("Please enter valid numbers!"),
+          backgroundColor: Colors.redAccent,
+        ),
       );
       return;
     }
@@ -32,7 +35,6 @@ class _BMICalculatorPageState extends State<BMICalculatorPage> {
     });
   }
 
-  /// ✅ Determine BMI Category
   String _getBMICategory(double bmi) {
     if (bmi < 18.5) {
       return "Underweight 😔";
@@ -48,90 +50,121 @@ class _BMICalculatorPageState extends State<BMICalculatorPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF121212), // ✅ Dark Theme Background
       appBar: AppBar(
         title: const Text("BMI Calculator"),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.deepPurple.shade900,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            /// ✅ Dark Theme Heading
             const Text(
               "Enter your weight & height to calculate BMI:",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white),
             ),
             const SizedBox(height: 20),
 
-            /// ✅ Weight Input
+            /// ✅ Weight Input (Dark Mode)
             TextField(
               controller: _weightController,
               keyboardType: TextInputType.number,
+              style: const TextStyle(color: Colors.white), // Text color
               decoration: InputDecoration(
                 labelText: "Weight (kg)",
-                prefixIcon: const Icon(Icons.fitness_center),
+                labelStyle:
+                    const TextStyle(color: Colors.white70), // Label color
+                prefixIcon:
+                    const Icon(Icons.fitness_center, color: Colors.white70),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white54),
                 ),
+                filled: true,
+                fillColor: Colors.grey[900], // Dark field background
               ),
             ),
             const SizedBox(height: 20),
 
-            /// ✅ Height Input
             TextField(
               controller: _heightController,
               keyboardType: TextInputType.number,
+              style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: "Height (cm)",
-                prefixIcon: const Icon(Icons.height),
+                labelStyle: const TextStyle(color: Colors.white70),
+                prefixIcon: const Icon(Icons.height, color: Colors.white70),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
+                  borderSide: const BorderSide(color: Colors.white54),
                 ),
+                filled: true,
+                fillColor: Colors.grey[900],
               ),
             ),
             const SizedBox(height: 20),
 
-            /// ✅ Calculate Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _calculateBMI,
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(15),
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Colors.deepPurpleAccent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
-                child: const Text("Calculate BMI",
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black)),
+                child: const Text(
+                  "Calculate BMI",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
 
             const SizedBox(height: 30),
 
-            /// ✅ Display BMI Result
             if (_bmi != null)
               Center(
-                child: Column(
-                  children: [
-                    Text(
-                      "Your BMI: ${_bmi!.toStringAsFixed(1)}",
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.bold),
+                child: Card(
+                  color: Colors.grey[850], // Dark card color
+                  elevation: 4,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        Text(
+                          "Your BMI: ${_bmi!.toStringAsFixed(1)}",
+                          style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          _bmiCategory,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: _bmiCategory.contains("Normal")
+                                ? Colors.green
+                                : Colors.red,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      _bmiCategory,
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: _bmiCategory.contains("Normal")
-                            ? Colors.green
-                            : Colors.red,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
           ],

@@ -40,13 +40,84 @@ class _CategoryPageState extends State<CategoryPage> {
     );
   }
 
-  void _onCategoryTapped(CategoryEntity category) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            ProductPage(selectedCategory: category, fromCategory: true),
+  /// ✅ Show Bottom Sheet with Category Details
+  void _showCategoryDetails(CategoryEntity category) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.grey[900], // Dark mode background
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /// ✅ Category Title
+              Text(
+                category.cName,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// ✅ Category Description
+              Text(
+                category.cDescription,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              /// ✅ View Products Button
+              Center(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurpleAccent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ProductPage(
+                          selectedCategory: category,
+                          fromCategory: true,
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text("View Products",
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ),
+
+              const SizedBox(height: 10),
+
+              /// ✅ Close Button
+              Center(
+                child: TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("Close",
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -59,9 +130,7 @@ class _CategoryPageState extends State<CategoryPage> {
           "Categories",
           style: TextStyle(color: Colors.white),
         ),
-        // centerTitle: true,
-        backgroundColor:
-            Colors.deepPurple.shade900, // ✅ Darker purple for contrast
+        backgroundColor: Colors.deepPurple.shade900, // ✅ Dark purple theme
         elevation: 2,
       ),
       body: Padding(
@@ -70,21 +139,20 @@ class _CategoryPageState extends State<CategoryPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             /// ✅ Dark Theme Heading
-            const Text(
-              "📂 Explore Categories",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            ),
+            // const Text(
+            //   "📂 Explore Categories",
+            //   style: TextStyle(
+            //     fontSize: 22,
+            //     fontWeight: FontWeight.bold,
+            //     color: Colors.white,
+            //   ),
+            // ),
             const SizedBox(height: 10),
 
             /// ✅ Dark Theme Subtitle
             const Text(
               "Select a category to view products.",
-              style: TextStyle(
-                  fontSize: 14, color: Colors.white70), // ✅ Light grey
+              style: TextStyle(fontSize: 14, color: Colors.white70),
             ),
             const SizedBox(height: 20),
 
@@ -108,8 +176,7 @@ class _CategoryPageState extends State<CategoryPage> {
                         return const Center(
                           child: Text(
                             'No categories available.',
-                            style: TextStyle(
-                                color: Colors.white70), // ✅ Light grey
+                            style: TextStyle(color: Colors.white70),
                           ),
                         );
                       } else {
@@ -125,7 +192,8 @@ class _CategoryPageState extends State<CategoryPage> {
                           itemCount: categories.length,
                           itemBuilder: (context, index) {
                             return GestureDetector(
-                              onTap: () => _onCategoryTapped(categories[index]),
+                              onTap: () =>
+                                  _showCategoryDetails(categories[index]),
                               child: _buildCategoryCard(categories[index]),
                             );
                           },
@@ -142,14 +210,13 @@ class _CategoryPageState extends State<CategoryPage> {
 
       /// ✅ Footer with Dark Theme
       bottomNavigationBar: FooterWidget(
-          currentIndex: 1,
-          onItemTapped: (index) {
-            // Handle navigation in the footer
-          }),
+        currentIndex: 1,
+        onItemTapped: (index) {},
+      ),
     );
   }
 
-  /// ✅ Category Card (Dark Theme)
+  /// ✅ Category Card with Dark Theme
   Widget _buildCategoryCard(CategoryEntity category) {
     String imageUrl =
         "http://10.0.2.2:8000/uploads/categories/${category.cImage}";
@@ -157,30 +224,66 @@ class _CategoryPageState extends State<CategoryPage> {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       elevation: 4,
-      color: Colors.grey[900], // ✅ Dark Grey for Card
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          /// ✅ Category Image with Dark Mode Error Icon
-          Image.network(imageUrl, height: 60,
-              errorBuilder: (context, error, stackTrace) {
-            return const Icon(Icons.image_not_supported,
-                size: 60, color: Colors.white); // ✅ Muted grey
-          }),
-
-          const SizedBox(height: 10),
-
-          /// ✅ Category Name with Dark Text
-          Text(
-            category.cName,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[300], // ✅ Softer white for better dark theme
+      color: Colors.grey[900], // Dark Grey for Card
+      child: SizedBox(
+        height: 180, // ✅ Increased Card Height
+        child: Stack(
+          children: [
+            /// ✅ Bigger Category Image
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15), // Rounded corners
+              child: Image.network(
+                imageUrl,
+                height: 160, // ✅ Increased Image Height
+                width: double.infinity, // Ensures full width
+                fit: BoxFit.cover, // Keeps the full image without cropping
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(Icons.image_not_supported,
+                      size: 60, color: Colors.white);
+                },
+              ),
             ),
-          ),
-        ],
+
+            /// ✅ Lighter Gradient Overlay for Better Image Visibility
+            Container(
+              height: 160, // Match the image height
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.3), // Slightly darker at bottom
+                    Colors.transparent, // No overlay at top
+                  ],
+                ),
+              ),
+            ),
+
+            /// ✅ Category Name Positioned Higher
+            Positioned(
+              bottom: 12, // Move text slightly higher
+              left: 10,
+              right: 10,
+              child: Text(
+                category.cName,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16, // Slightly bigger font
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white, // White text for contrast
+                  shadows: [
+                    Shadow(
+                      blurRadius: 3,
+                      color:
+                          Colors.black.withOpacity(0.8), // Softer text shadow
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

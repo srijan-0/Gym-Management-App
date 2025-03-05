@@ -23,9 +23,9 @@ class _CaloriesBurnedTrackerState extends State<CaloriesBurnedTracker> {
   double _totalElevationGain = 0.0;
   final double _caloriesPerStep = 0.04;
   final double _stepLength = 0.0008;
-  final double _threshold = 1.5;
+  final double _threshold = 2.0; // Increased threshold to reduce false steps
   double _lastAccel = 0.0;
-  final int _stepGoal = 10000;
+  final int _stepGoal = 5000;
   DateTime? _lastStepTime;
 
   @override
@@ -70,33 +70,38 @@ class _CaloriesBurnedTrackerState extends State<CaloriesBurnedTracker> {
       double acceleration =
           sqrt(event.x * event.x + event.y * event.y + event.z * event.z);
 
+      /// 🔹 Reduce Sensitivity by Increasing Threshold
       if ((acceleration - _lastAccel).abs() > _threshold) {
-        setState(() {
-          _steps++;
-          _caloriesBurned = _steps * _caloriesPerStep;
-        });
-
-        /// 🔹 Track Active Minutes
         DateTime now = DateTime.now();
-        if (_lastStepTime == null ||
-            now.difference(_lastStepTime!).inSeconds > 60) {
-          _activeMinutes++;
-          _lastStepTime = now;
-        }
 
-        _saveSteps();
+        /// 🔹 Implement Time-Based Debounce (Prevent Fast Step Increase)
+        if (_lastStepTime == null ||
+            now.difference(_lastStepTime!).inMilliseconds > 400) {
+          // Debounce 400ms
+          setState(() {
+            _steps++;
+            _caloriesBurned = _steps * _caloriesPerStep;
+          });
+
+          /// Track Active Minutes
+          if (_lastStepTime == null ||
+              now.difference(_lastStepTime!).inSeconds > 60) {
+            _activeMinutes++;
+          }
+
+          _lastStepTime = now;
+          _saveSteps();
+        }
       }
       _lastAccel = acceleration;
 
-      /// 🔹 Detect Floors Climbed
       double verticalMovement = event.z - _lastZ;
-      if (verticalMovement.abs() > 0.5) {
+      if (verticalMovement.abs() > 0.6) {
         _totalElevationGain += verticalMovement;
         if (_totalElevationGain >= 3.0) {
-          // 3 meters = 1 floor
           setState(() {
             _floorsClimbed++;
-            _totalElevationGain = 0; // Reset after counting
+            _totalElevationGain = 0;
           });
           _saveSteps();
         }

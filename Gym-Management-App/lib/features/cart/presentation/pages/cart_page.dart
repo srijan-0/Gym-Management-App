@@ -58,7 +58,8 @@ class _CartPageState extends State<CartPage> {
               },
               style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurpleAccent),
-              child: const Text("Confirm"),
+              child:
+                  const Text("Confirm", style: TextStyle(color: Colors.white)),
             ),
           ],
         );
