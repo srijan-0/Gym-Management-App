@@ -110,11 +110,14 @@ class LoginView extends StatelessWidget {
                                   const Text("Remember Me"),
                                 ],
                               ),
-                              TextButton(
-                                onPressed: () {},
-                                child: const Text(
-                                  "Forgot Password?",
-                                  style: TextStyle(color: Colors.deepPurple),
+                              Flexible(
+                                child: TextButton(
+                                  onPressed: () {},
+                                  child: const Text(
+                                    "Forgot Password?",
+                                    style: TextStyle(color: Colors.deepPurple),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
                               ),
                             ],
