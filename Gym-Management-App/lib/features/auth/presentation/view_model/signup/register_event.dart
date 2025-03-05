@@ -15,6 +15,9 @@ class UploadImage extends RegisterEvent {
   const UploadImage({
     required this.file,
   });
+
+  @override
+  List<Object> get props => [file];
 }
 
 class Registercustomer extends RegisterEvent {
@@ -22,7 +25,7 @@ class Registercustomer extends RegisterEvent {
   final String name;
   final String email;
   final String password;
-  final String cPassword; // Added confirmPassword field
+  final String cPassword;
   final String? userImage;
 
   const Registercustomer({
@@ -30,7 +33,7 @@ class Registercustomer extends RegisterEvent {
     required this.name,
     required this.email,
     required this.password,
-    required this.cPassword, // Include confirmPassword in constructor
+    required this.cPassword,
     this.userImage,
   });
 
