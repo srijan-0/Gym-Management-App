@@ -20,4 +20,6 @@ class AuthEntity extends Equatable {
   @override
   List<Object?> get props =>
       [userId, name, email, password, userImage, cPassword];
+
+  get token => null;
 }
