@@ -12,21 +12,20 @@ class AuthLocalDataSource implements IAuthDataSource {
 
   @override
   Future<AuthEntity> getCurrentUser() {
-    // Return Empty AuthEntity
     return Future.value(AuthEntity(
       userId: "1",
       name: "",
       userImage: "",
       email: "",
       password: "",
-      cPassword: "", // Make sure cPassword is included here
+      cPassword: "",
     ));
   }
 
   @override
   Future<String> logincustomer(String email, String password) async {
     try {
-      await _hiveService.login(email, password); // Adjusted to email
+      await _hiveService.login(email, password);
       return Future.value("Success");
     } catch (e) {
       return Future.error(e);
@@ -36,7 +35,6 @@ class AuthLocalDataSource implements IAuthDataSource {
   @override
   Future<void> registercustomer(AuthEntity customer) async {
     try {
-      // Make sure the AuthEntity has the correct values
       final authHiveModel =
           AuthHiveModel.fromEntity(customer, customer.cPassword);
 
@@ -52,27 +50,3 @@ class AuthLocalDataSource implements IAuthDataSource {
     throw UnimplementedError();
   }
 }
-
-// import 'package:login/core/network/hive_service.dart';
-
-// class AuthLocalDataSource {
-//   final HiveService _hiveService;
-
-//   AuthLocalDataSource(this._hiveService);
-
-//   Future<void> saveToken(String token) async {
-//     await _hiveService.saveToken(token);
-//   }
-
-//   String? getToken() {
-//     return _hiveService.getToken();
-//   }
-
-//   Future<void> clearToken() async {
-//     await _hiveService.clearToken();
-//   }
-
-//   Future<void> clearCustomerBox() async {
-//     await _hiveService.clearCustomerBox();
-//   }
-// }
