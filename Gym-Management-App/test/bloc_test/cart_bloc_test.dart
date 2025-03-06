@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:login/features/cart/domain/entities/cart_entity.dart';
 import 'package:login/features/cart/presentation/bloc/cart_bloc.dart';
 import 'package:login/features/cart/presentation/bloc/cart_event.dart';
-import 'package:mocktail/mocktail.dart'; // Import mocktail
+import 'package:mocktail/mocktail.dart';
 
 class MockCartEntity extends Mock implements CartEntity {}
 
@@ -12,7 +12,6 @@ void main() {
 
   setUp(() {
     cartBloc = CartBloc();
-    // Register fallback values for CartEntity properties if needed
     registerFallbackValue(MockCartEntity());
   });
 
@@ -21,7 +20,6 @@ void main() {
   });
 
   group('CartBloc', () {
-    // Test GetCartItemsEvent
     blocTest<CartBloc, CartState>(
       'emits initial cart state when GetCartItemsEvent is triggered',
       build: () => cartBloc,
@@ -35,7 +33,6 @@ void main() {
       ],
     );
 
-    // Test AddToCartEvent
     blocTest<CartBloc, CartState>(
       'emits updated cart state when AddToCartEvent is triggered',
       build: () => cartBloc,
@@ -63,7 +60,6 @@ void main() {
       ],
     );
 
-    // Test multiple AddToCartEvents
     blocTest<CartBloc, CartState>(
       'emits updated cart state with multiple items when AddToCartEvent is triggered multiple times',
       build: () => cartBloc,
@@ -120,7 +116,6 @@ void main() {
       ],
     );
 
-    // Test RemoveFromCartEvent
     blocTest<CartBloc, CartState>(
       'emits updated cart state when RemoveFromCartEvent is triggered',
       build: () => cartBloc,
@@ -146,7 +141,5 @@ void main() {
         ),
       ],
     );
-
-    // Test RemoveFromCartEvent with non-existent productId
   });
 }

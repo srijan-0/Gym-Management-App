@@ -8,7 +8,6 @@ import 'package:login/features/category/presentation/bloc/category_event.dart';
 import 'package:login/features/category/presentation/bloc/category_state.dart';
 import 'package:mocktail/mocktail.dart';
 
-// ✅ Mock Dependencies
 class MockGetAllCategories extends Mock implements GetAllCategories {}
 
 void main() {

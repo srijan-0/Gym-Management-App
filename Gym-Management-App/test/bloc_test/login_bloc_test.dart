@@ -5,7 +5,6 @@ import 'package:login/features/auth/presentation/view/login_view.dart';
 import 'package:login/features/auth/presentation/view_model/login/login_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 
-/// **Mock Class for LoginBloc**
 class MockLoginBloc extends Mock implements LoginBloc {}
 
 void main() {
@@ -26,10 +25,8 @@ void main() {
 
   testWidgets('should render login screen correctly',
       (WidgetTester tester) async {
-    // **Arrange**
     await tester.pumpWidget(createTestableWidget(LoginView()));
 
-    // **Assert: Check if UI elements exist**
     expect(find.text('FitZone'), findsOneWidget);
     expect(find.text('Your Fitness Journey Starts Here'), findsOneWidget);
     expect(find.byType(TextFormField),
